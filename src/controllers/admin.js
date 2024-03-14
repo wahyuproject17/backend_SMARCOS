@@ -8,21 +8,20 @@ pool.on('error',(err)=> {
 });
 
 module.exports ={
-    saveRegister(req,res){
+    saveAdmin(req,res){
         let username = req.body.username;
         let nama_lengkap = req.body.namalengkap;
         let no_hp = req.body.nohp;
         let email = req.body.email;
-        let alamat = req.body.alamat;
         let password = req.body.pass;
 
-        if (username && nama_lengkap && no_hp && email && alamat && password) {
+        if (username && nama_lengkap && no_hp && email && password) {
     
             pool.getConnection(function(err, connection) {
                 if (err) throw err;
                 connection.query(
-                    `INSERT INTO tbl_user (username, nama_lengkap, no_hp, email, alamat, password) VALUES (?,?,?,?,SHA2(?,512));`
-                , [username, nama_lengkap, no_hp, email, alamat, password],function (error, results) {
+                    `INSERT INTO tbl_user (username, nama_lengkap, no_hp, email, password) VALUES (?,?,?,SHA2(?,512));`
+                , [username, nama_lengkap, no_hp, email, password],function (error, results) {
                     if (error) throw error;
               
                     req.flash('color', 'success');

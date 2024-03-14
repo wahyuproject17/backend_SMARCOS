@@ -14,14 +14,15 @@ module.exports = {
     },
     inputIkan(req, res){
         let jenis_ikan = req.body.jenisikan;
-        let jumlah_ikan = req.body.jumlahikan;
+        let jumlah_ikan = req.body.jumlah;
+        let harga_ikan = req.body.harga;
 
         if (jenis_ikan && stok_ikan){
             pool.getConnection(function(err, connection){
                 if (err) throw err;
                 connection.query(
-                    `INSERT INTO tbl_ikan (jenis_ikan, jumlah_ikan) VALUES (?,?);`,
-                    [jenis_ikan, jumlah_ikan], function (error, res){
+                    `INSERT INTO tbl_ikan (jenis_ikan, jumlah_ikan, harga_ikan) VALUES (?,?,?);`,
+                    [jenis_ikan, jumlah_ikan, harga_ikan], function (error, res){
                         if (error) throw error;
               
                     req.flash('color', 'success');
