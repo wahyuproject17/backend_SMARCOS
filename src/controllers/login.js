@@ -9,18 +9,19 @@ pool.on('error',(err)=> {
 
 module.exports ={
     loginAuth(req,res){
+        let username = req.body.username;
         let email = req.body.email;
         let password = req.body.pass;
-        if (email && password) {
+        if (username || email && password) {
             pool.getConnection(function(err, connection) {
                 if (err) throw err;
                 connection.query(
-                    `SELECT * FROM user_register WHERE email = ? AND password = SHA2(?,512)`
-                , [email, password],function (error, results) {
-                    if (error) throw error;  
+                    `SELECT * FROM tbl_user WHERE email = ? OR username = ? AND password = SHA2(?,512)`
+                , [email, username, password],function (error, results) {
+                    if (error) throw error;
                     if (results.length > 0) {
                         req.session.loggedin = true;
-                        req.session.userid = results[0].user_id;
+                        req.session.userid = results[0].id_user;
                         req.session.email = results[0].email;
                         res.redirect('/');
                     } else {
