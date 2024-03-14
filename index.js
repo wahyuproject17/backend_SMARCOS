@@ -6,7 +6,6 @@ const path = require('path')
 const flash = require('req-flash')
 const port = 3000
 const bodyParser = require('body-parser')
-const response = require('./response')
 
 //router
 const userRoutes = require('./src/routes/router-user')

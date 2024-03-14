@@ -8,7 +8,7 @@ pool.on('error',(err)=> {
 });
 
 module.exports ={
-    SaveAdmin(req,res){
+    AddAdmin(req,res){
         let username = req.body.username;
         let nama_lengkap = req.body.namalengkap;
         let no_hp = req.body.nohp;
@@ -43,6 +43,6 @@ module.exports ={
 
     },
     DeleteAdmin(req, res){
-        
+
     }
 }

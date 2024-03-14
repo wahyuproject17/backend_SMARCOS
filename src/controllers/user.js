@@ -1,3 +1,4 @@
+const response = require('./response');
 const database = require('../initializers/database');
 
 let mysql = require('mysql');
@@ -21,7 +22,7 @@ module.exports ={
             pool.getConnection(function(err, connection) {
                 if (err) throw err;
                 connection.query(
-                    `INSERT INTO tbl_user (username, nama_lengkap, no_hp, email, alamat, password) VALUES (?,?,?,?,SHA2(?,512));`
+                    `INSERT INTO tbl_user (username, nama_lengkap, no_hp, email, alamat, password) VALUES (?,?,?,?,?,SHA2(?,512));`
                 , [username, nama_lengkap, no_hp, email, alamat, password],function (error, results) {
                     if (error) throw error;
               
@@ -29,6 +30,7 @@ module.exports ={
                     req.flash('status', 'Yes..');
                     req.flash('message', 'Registrasi berhasil');
                     
+                    response();
                     res.redirect('/login');
                 });
               
