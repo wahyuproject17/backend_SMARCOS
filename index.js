@@ -9,10 +9,12 @@ const bodyParser = require('body-parser')
 const response = require('./response')
 
 //router
-const registerRoutes = require('./src/routes/router-register')
-const loginRoutes = require('./src/routes/router-login')
+const userRoutes = require('./src/routes/router-user')
+const adminRoutes = require('./src/routes/router-admin')
+const authRoutes = require('./src/routes/router-authentication')
 const appRoutes = require('./src/routes/router-app')
 const dashboardRoutes = require('./src/routes/router-dashboard')
+
 
 //body parser
 app.use(bodyParser.urlencoded({extended: false}))
@@ -32,9 +34,10 @@ app.use(session({
 app.use(flash())
 
 //routes
-app.use('/login', loginRoutes)
-app.use('/register', registerRoutes)
+app.use('/login', authRoutes)
+app.use('/register', userRoutes)
 app.use('/dashboard', dashboardRoutes)
+app.use('/admin', adminRoutes)
 app.use('/', appRoutes)
 
 app.listen(port, () => {

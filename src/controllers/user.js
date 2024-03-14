@@ -8,7 +8,7 @@ pool.on('error',(err)=> {
 });
 
 module.exports ={
-    saveRegister(req,res){
+    AddUser(req,res){
         let username = req.body.username;
         let nama_lengkap = req.body.namalengkap;
         let no_hp = req.body.nohp;

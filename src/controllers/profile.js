@@ -8,7 +8,7 @@ pool.on('error',(err)=> {
 });
 
 module.exports ={
-    profile(req,res){
+    Profile(req,res){
         let id_user = req.session.usersid
         pool.getConnection(function(err, connection) {
             if (err) throw err;

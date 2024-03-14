@@ -8,7 +8,7 @@ pool.on('error',(err)=> {
 });
 
 module.exports ={
-    loginAuth(req,res){
+    Login(req,res){
         let username = req.body.username;
         let email = req.body.email;
         let password = req.body.pass;
@@ -38,7 +38,7 @@ module.exports ={
             res.end();
         }
     },
-    logout(req,res){
+    Logout(req,res){
         req.session.destroy((err) => {
             if(err) {
                 return console.log(err);

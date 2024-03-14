@@ -8,7 +8,7 @@ pool.on('error', (err) => {
 });
 
 module.exports = {
-    dashboard(req, res){
+    Dashboard(req, res){
         let data_ph = req.body.phair;
         let data_suhu = req.body.suhuair;
     },
