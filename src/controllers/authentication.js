@@ -1,3 +1,4 @@
+const response = require('./response');
 const database = require('../initializers/database');
 
 let mysql      = require('mysql');
@@ -23,6 +24,7 @@ module.exports ={
                         req.session.loggedin = true;
                         req.session.userid = results[0].id_user;
                         req.session.email = results[0].email;
+                        response();
                         res.redirect('/');
                     } else {
                         req.flash('color', 'danger');
