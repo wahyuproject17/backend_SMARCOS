@@ -37,6 +37,9 @@ module.exports ={
                 connection.release();
             })
         } else {
+            req.flash('color', 'danger');
+            req.flash('status', 'gagal');
+            req.flash('message', 'Username atau No Hp atau Email sudah digunakan');
             
             res.redirect('/login');
             res.end();
