@@ -12,7 +12,7 @@ module.exports = {
         let data_ph = req.body.phair;
         let data_suhu = req.body.suhuair;
     },
-    inputIkan(req, res){
+    AddIkan(req, res){
         let jenis_ikan = req.body.jenisikan;
         let jumlah_ikan = req.body.jumlah;
         let harga_ikan = req.body.harga;
@@ -29,7 +29,7 @@ module.exports = {
                     req.flash('status', 'Yes..');
                     req.flash('message', 'Input berhasil');
                     
-                    res.redirect('/inputIkan');
+                    res.redirect('/AddIkan');
                 });
               
                 connection.release();
