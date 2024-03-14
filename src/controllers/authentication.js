@@ -27,10 +27,11 @@ module.exports ={
                         response();
                         res.redirect('/');
                     } else {
+                        response();
                         req.flash('color', 'danger');
                         req.flash('status', 'Oops..');
                         req.flash('message', 'Akun tidak ditemukan');
-                        res.redirect('/login');
+                        res.redirect('/auth');
                     }
                 });
                 connection.release();

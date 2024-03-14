@@ -33,7 +33,7 @@ app.use(session({
 app.use(flash())
 
 //routes
-app.use('/login', authRoutes)
+app.use('/auth', authRoutes)
 app.use('/register', userRoutes)
 app.use('/dashboard', dashboardRoutes)
 app.use('/admin', adminRoutes)
