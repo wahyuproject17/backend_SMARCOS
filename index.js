@@ -7,6 +7,8 @@ const flash = require('req-flash')
 const port = 3000
 const bodyParser = require('body-parser')
 
+// coment
+
 //router
 const userRoutes = require('./src/routes/router-user')
 const adminRoutes = require('./src/routes/router-admin')
