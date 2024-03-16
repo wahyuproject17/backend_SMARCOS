@@ -1,6 +1,6 @@
 const crypto = require('crypto');
-module.exports = {
-    hashPassword(password) {
+
+function hashPassword(password) {
         const hash = crypto.createHash('sha512');
         // Meng-update hash dengan password
         hash.update(password);
@@ -8,4 +8,5 @@ module.exports = {
         const hashedPassword = hash.digest('hex');
         return hashedPassword;
 }
-}
+
+module.exports = {hashPassword};

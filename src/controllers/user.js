@@ -1,4 +1,3 @@
-const response = require('./response');
 const database = require('../initializers/database');
 
 let mysql = require('mysql');
@@ -30,7 +29,6 @@ module.exports ={
                     req.flash('status', 'Yes..');
                     req.flash('message', 'Registrasi berhasil');
                     
-                    response();
                     res.redirect('/login');
                 });
               
