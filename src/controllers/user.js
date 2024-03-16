@@ -42,5 +42,13 @@ module.exports ={
             res.redirect('/login');
             res.end();
         }
+    },
+    EditUser(req, res){
+        let username = username;
+        let nama_lengkap = req.body.namalengkap;
+        let no_hp = req.body.nohp;
+        let email = req.body.email;
+        let alamat = req.body.alamat;
+        let password = req.body.pass;
     }
 }
