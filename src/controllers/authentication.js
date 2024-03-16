@@ -1,4 +1,4 @@
-const response = require('./response');
+const {hashPassword} = require('../utils/hashPassword');
 const database = require('../initializers/database');
 
 let mysql      = require('mysql');
@@ -10,28 +10,26 @@ pool.on('error',(err)=> {
 
 module.exports ={
     Login(req,res){
-        let username = req.body.username;
         let email = req.body.email;
         let password = req.body.pass;
-        if (username || email && password) {
+        if (email && password) {
+            let hashedPassword = hashPassword(password);
             pool.getConnection(function(err, connection) {
                 if (err) throw err;
                 connection.query(
-                    `SELECT * FROM tbl_user WHERE email = ? OR username = ? AND password = SHA2(?,512)`
-                , [email, username, password],function (error, results) {
+                    `SELECT * FROM tbl_user WHERE email = ? AND password = ?`
+                , [email, hashedPassword], function (error, results) {
                     if (error) throw error;
-                    if (results.length > 0) {
+                    if (!results.length == 0) {
                         req.session.loggedin = true;
                         req.session.userid = results[0].id_user;
-                        req.session.email = results[0].email;
-                        response();
+                        req.session.username = results[0].username;
                         res.redirect('/');
                     } else {
-                        response();
                         req.flash('color', 'danger');
                         req.flash('status', 'Oops..');
                         req.flash('message', 'Akun tidak ditemukan');
-                        res.redirect('/auth');
+                        res.redirect('/login');
                     }
                 });
                 connection.release();
