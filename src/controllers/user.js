@@ -8,7 +8,13 @@ pool.on('error',(err)=> {
 });
 
 module.exports ={
-    AddUser(req,res){
+    getUser(req, res){
+
+    },
+    getUserById(req, res){
+
+    },
+    createUser(req,res){
         let username = req.body.username;
         let nama_lengkap = req.body.namalengkap;
         let no_hp = req.body.nohp;
@@ -43,12 +49,15 @@ module.exports ={
             res.end();
         }
     },
-    EditUser(req, res){
+    updateUser(req, res){
         let username = username;
         let nama_lengkap = req.body.namalengkap;
         let no_hp = req.body.nohp;
         let email = req.body.email;
         let alamat = req.body.alamat;
         let password = req.body.pass;
+    },
+    deleteUser(req, res){
+        
     }
 }

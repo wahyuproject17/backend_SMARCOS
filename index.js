@@ -6,8 +6,7 @@ const path = require('path')
 const flash = require('req-flash')
 const port = 3000
 const bodyParser = require('body-parser')
-
-// coment
+require ('dotenv').config()
 
 //router
 const userRoutes = require('./src/routes/router-user')
@@ -36,7 +35,7 @@ app.use(flash())
 
 //routes
 app.use('/auth', authRoutes)
-app.use('/register', userRoutes)
+app.use('/user', userRoutes)
 app.use('/dashboard', dashboardRoutes)
 app.use('/admin', adminRoutes)
 app.use('/', appRoutes)
