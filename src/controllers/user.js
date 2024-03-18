@@ -63,12 +63,36 @@ module.exports ={
         }
     },
     updateUser(req, res){
-        let username = username;
+        let username = req.body.username;
         let nama_lengkap = req.body.namalengkap;
         let no_hp = req.body.nohp;
         let email = req.body.email;
         let alamat = req.body.alamat;
         let password = req.body.pass;
+
+        if(username && nama_lengkap && no_hp && email && alamat && password){
+            pool.getConnection(function(err, connection){
+                if (err) throw error;
+                connection.query(
+                    `UPDATE tbl_user(username, nama_lengkap, no_hp, email, alamat, password) SET (?,?,?,?,?,SHA2(?,512));`,
+                    [username, nama_lengkap, no_hp, email, alamat, password], function(error, result){
+                        if(error) throw error;
+                        req.flash('color', 'success');
+                        req.flash('status', 'Yes..');
+                        req.flash('message', 'Registrasi berhasil');
+
+                        res.redirect('/');
+                    }
+                )
+            })
+        }else {
+            req.flash('color', 'danger');
+            req.flash('status', 'gagal');
+            req.flash('message', 'Username atau No Hp atau Email sudah digunakan');
+            
+            res.redirect('/');
+            res.end();
+        }
     },
     deleteUser(req, res){
         
