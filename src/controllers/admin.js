@@ -8,7 +8,33 @@ pool.on('error',(err)=> {
 });
 
 module.exports ={
-    AddAdmin(req,res){
+    getAdmin(req, res){
+        pool.getConnection(function(err, connection){
+            if (err) throw error;
+            connection.query(
+                `SELECT * FROM tbl_admin`, function(error, result){
+                    if (error) throw error;
+
+                    res.send(result)
+                }
+            )
+        });
+    },
+    getAdminById(req, res){
+        const userid = req.params.id;
+        pool.getConnection(function(err, connection){
+            if (err) throw error;
+            connection.query(
+                `SELECT * FROM tbl_admin WHERE id_admin=?`, [userid],
+                function(error, result){
+                    if(error) throw error;
+
+                    res.send(result)
+                }
+            )
+        })
+    },
+    createAdmin(req,res){
         let username = req.body.username;
         let nama_lengkap = req.body.namalengkap;
         let no_hp = req.body.nohp;
@@ -20,7 +46,7 @@ module.exports ={
             pool.getConnection(function(err, connection) {
                 if (err) throw err;
                 connection.query(
-                    `INSERT INTO tbl_user (username, nama_lengkap, no_hp, email, password) VALUES (?,?,?,SHA2(?,512));`
+                    `INSERT INTO tbl_admin (username, nama_lengkap, no_hp, email, password) VALUES (?,?,?,?,SHA2(?,512));`
                 , [username, nama_lengkap, no_hp, email, password],function (error, results) {
                     if (error) throw error;
               
@@ -34,15 +60,63 @@ module.exports ={
                 connection.release();
             })
         } else {
+            req.flash('color', 'danger');
+            req.flash('status', 'gagal');
+            req.flash('message', 'Username atau No Hp atau Email sudah digunakan');
             
             res.redirect('/login');
             res.end();
         }
     },
-    ChangeAdmin(req, res){
+    updateAdmin(req, res){
+        let userid = req.params.id;
+        let username = req.body.username;
+        let nama_lengkap = req.body.namalengkap;
+        let no_hp = req.body.nohp;
+        let password = req.body.pass;
 
+        if(username && nama_lengkap && no_hp && email && password){
+            pool.getConnection(function(err, connection){
+                if (err) throw error;
+                connection.query(
+                    `UPDATE tbl_admin SET username = ?, nama_lengkap = ?, no_hp = ?, email = ?, password = SHA2(?, 512) WHERE id_admin = ?;`,
+                    [username, nama_lengkap, no_hp, email, password, userid], function(error, result){
+                        if(error) throw error;
+                        req.flash('color', 'success');
+                        req.flash('status', 'Yes..');
+                        req.flash('message', 'Ubah data berhasil');
+
+                        res.redirect('/');
+                    }
+                )
+            })
+        }else {
+            req.flash('color', 'danger');
+            req.flash('status', 'gagal');
+            req.flash('message', 'Username atau No Hp atau Email sudah digunakan');
+            
+            res.redirect('/');
+            res.end();
+        }
     },
-    DeleteAdmin(req, res){
-        
+    deleteAdmin(req, res){
+        let userid = req.params.id;
+
+        if(userid){
+            pool.getConnection(function(err, connection){
+                if (err) throw error;
+                connection.query(
+                    `DELETE FROM tbl_admin WHERE id_admin = ?`, [userid],
+                    function(error, result){
+                        if(error) throw error;
+                        req.flash('color', 'success');
+                        req.flash('status', 'Yes..');
+                        req.flash('message', 'Penghapusan berhasil');
+
+                        res.redirect('/');
+                    }
+                )
+            })
+        }
     }
 }

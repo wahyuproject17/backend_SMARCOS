@@ -14,16 +14,23 @@ module.exports ={
             connection.query(
                 `SELECT * FROM tbl_user`, function(error, result){
                     if (error) throw error;
+
+                    res.send(result)
                 }
             )
         });
     },
     getUserById(req, res){
-        const id = req.session.userid;
+        const userid = req.params.id;
         pool.getConnection(function(err, connection){
             if (err) throw error;
             connection.query(
-                'SELECT * FROM tbl_user WHERE id_user=id'
+                `SELECT * FROM tbl_user WHERE id_user=?`, [userid],
+                function(error, result){
+                    if(error) throw error;
+
+                    res.send(result)
+                }
             )
         })
     },
@@ -63,6 +70,7 @@ module.exports ={
         }
     },
     updateUser(req, res){
+        let userid = req.params.id;
         let username = req.body.username;
         let nama_lengkap = req.body.namalengkap;
         let no_hp = req.body.nohp;
@@ -74,12 +82,12 @@ module.exports ={
             pool.getConnection(function(err, connection){
                 if (err) throw error;
                 connection.query(
-                    `UPDATE tbl_user(username, nama_lengkap, no_hp, email, alamat, password) SET (?,?,?,?,?,SHA2(?,512));`,
-                    [username, nama_lengkap, no_hp, email, alamat, password], function(error, result){
+                    `UPDATE tbl_user SET username = ?, nama_lengkap = ?, no_hp = ?, email = ?, alamat = ?, password = SHA2(?, 512) WHERE id_user = ?;`,
+                    [username, nama_lengkap, no_hp, email, alamat, password, userid], function(error, result){
                         if(error) throw error;
                         req.flash('color', 'success');
                         req.flash('status', 'Yes..');
-                        req.flash('message', 'Registrasi berhasil');
+                        req.flash('message', 'Ubah data berhasil');
 
                         res.redirect('/');
                     }
@@ -95,6 +103,23 @@ module.exports ={
         }
     },
     deleteUser(req, res){
-        
+        let userid = req.params.id;
+
+        if(userid){
+            pool.getConnection(function(err, connection){
+                if (err) throw error;
+                connection.query(
+                    `DELETE FROM tbl_user WHERE id_user = ?`, [userid],
+                    function(error, result){
+                        if(error) throw error;
+                        req.flash('color', 'success');
+                        req.flash('status', 'Yes..');
+                        req.flash('message', 'Penghapusan berhasil');
+
+                        res.redirect('/');
+                    }
+                )
+            })
+        }
     }
 }
