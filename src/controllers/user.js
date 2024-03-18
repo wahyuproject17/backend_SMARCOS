@@ -9,10 +9,23 @@ pool.on('error',(err)=> {
 
 module.exports ={
     getUser(req, res){
-
+        pool.getConnection(function(err, connection){
+            if (err) throw error;
+            connection.query(
+                `SELECT * FROM tbl_user`, function(error, result){
+                    if (error) throw error;
+                }
+            )
+        });
     },
     getUserById(req, res){
-
+        const id = req.session.userid;
+        pool.getConnection(function(err, connection){
+            if (err) throw error;
+            connection.query(
+                'SELECT * FROM tbl_user WHERE id_user=id'
+            )
+        })
     },
     createUser(req,res){
         let username = req.body.username;
