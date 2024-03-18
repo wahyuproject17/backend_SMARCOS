@@ -12,7 +12,7 @@ module.exports = {
         let data_ph = req.body.phair;
         let data_suhu = req.body.suhuair;
     },
-    AddIkan(req, res){
+    createIkan(req, res){
         let jenis_ikan = req.body.jenisikan;
         let jumlah_ikan = req.body.jumlah;
         let harga_ikan = req.body.harga;

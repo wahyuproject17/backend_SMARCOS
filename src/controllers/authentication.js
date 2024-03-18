@@ -14,7 +14,6 @@ module.exports ={
         let password = req.body.pass;
         if (email && password) {
             let hashedPassword = hashPassword(password);
-            console.log(hashedPassword);
             pool.getConnection(function(err, connection) {
                 if (err) throw err;
                 connection.query(

@@ -39,6 +39,7 @@ module.exports ={
         let nama_lengkap = req.body.namalengkap;
         let no_hp = req.body.nohp;
         let email = req.body.email;
+        let jenkel = req.body.jenkel;
         let alamat = req.body.alamat;
         let password = req.body.pass;
 
@@ -47,8 +48,8 @@ module.exports ={
             pool.getConnection(function(err, connection) {
                 if (err) throw err;
                 connection.query(
-                    `INSERT INTO tbl_user (username, nama_lengkap, no_hp, email, alamat, password) VALUES (?,?,?,?,?,SHA2(?,512));`
-                , [username, nama_lengkap, no_hp, email, alamat, password],function (error, results) {
+                    `INSERT INTO tbl_user (username, nama_lengkap, no_hp, email, jenkel, alamat, password) VALUES (?,?,?,?,?,?,SHA2(?,512));`
+                , [username, nama_lengkap, no_hp, email, jenkel, alamat, password],function (error, results) {
                     if (error) throw error;
               
                     req.flash('color', 'success');
@@ -75,6 +76,7 @@ module.exports ={
         let nama_lengkap = req.body.namalengkap;
         let no_hp = req.body.nohp;
         let email = req.body.email;
+        let jenkel = req.body.jenkel;
         let alamat = req.body.alamat;
         let password = req.body.pass;
 
@@ -82,8 +84,8 @@ module.exports ={
             pool.getConnection(function(err, connection){
                 if (err) throw error;
                 connection.query(
-                    `UPDATE tbl_user SET username = ?, nama_lengkap = ?, no_hp = ?, email = ?, alamat = ?, password = SHA2(?, 512) WHERE id_user = ?;`,
-                    [username, nama_lengkap, no_hp, email, alamat, password, userid], function(error, result){
+                    `UPDATE tbl_user SET username = ?, nama_lengkap = ?, no_hp = ?, email = ?, jenkel = ?, alamat = ?, password = SHA2(?, 512) WHERE id_user = ?;`,
+                    [username, nama_lengkap, no_hp, email, jenkel, alamat, password, userid], function(error, result){
                         if(error) throw error;
                         req.flash('color', 'success');
                         req.flash('status', 'Yes..');

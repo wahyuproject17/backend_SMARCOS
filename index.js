@@ -15,6 +15,8 @@ const authRoutes = require('./src/routes/router-authentication')
 const appRoutes = require('./src/routes/router-app')
 const dashboardRoutes = require('./src/routes/router-dashboard')
 
+//view engine
+app.set('view engine', 'ejs');
 
 //body parser
 app.use(bodyParser.urlencoded({extended: false}))

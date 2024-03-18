@@ -3,6 +3,6 @@ const dashboardController = require('../controllers').dashboard;
 const verifyUser = require('../initializers/verify');
 
 router.get('/dashboard', verifyUser.isLogin, dashboardController.Dashboard);
-router.post('/add-ikan', verifyUser.isLogin, dashboardController.AddIkan);
+router.post('/add-ikan', verifyUser.isLogin, dashboardController.createIkan);
 
 module.exports = router;
