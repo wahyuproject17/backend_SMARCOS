@@ -109,8 +109,5 @@ module.exports = {
                 )
             })
         }
-    },
-    addTulisan(req, res){
-        let tulisan = get.body.tulisan;
     }
     }
