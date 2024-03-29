@@ -31,5 +31,11 @@ module.exports ={
                 )
             })
         }
+    },
+    editTulisan(req, res){
+
+    },
+    deleteTulisan(req, res){
+        
     }
 }

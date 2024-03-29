@@ -20,7 +20,7 @@ module.exports = {
                 req.flash('color', 'danger');
                 req.flash('status', 'Oops..');
                 req.flash('message', err.message || 'Terjadi kesalahan saat mengunggah file.');
-                return res.redirect('/inputIkan');
+                return res.redirect('/');
             }
             
             let jenis_ikan = req.body.jenisikan;
@@ -48,7 +48,7 @@ module.exports = {
                 req.flash('color', 'danger');
                 req.flash('status', 'Oops..');
                 req.flash('message', 'Data yang dimasukkan tidak lengkap!');
-                res.redirect('/inputIkan');
+                res.redirect('/');
             }
         });
     },
