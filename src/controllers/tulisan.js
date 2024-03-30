@@ -9,11 +9,11 @@ pool.on('error',(err)=> {
 
 module.exports ={
     addTulisan(req, res){
-        let ucapan = get.body.ucapan;
-        let alamat = get.body.alamat;
-        let telepon = get.body.telepon;
-        let instagram = get.body.instagram;
-        let email = get.body.email;
+        let ucapan = req.body.ucapan;
+        let alamat = req.body.alamat;
+        let telepon = req.body.telepon;
+        let instagram = req.body.instagram;
+        let email = req.body.email;
 
         if(ucapan && alamat && telepon && instagram && email){
             pool.getConnection(function(err, connection){
@@ -57,5 +57,17 @@ module.exports ={
                 )
             })
         }
+    },
+    showTulisan(req, res){
+        pool.getConnection(function(err, connection){
+            if (err) throw error;
+            connection.query(
+                `SELECT * FROM tbl_tulisan`,
+                function(error, results){
+                    if (error) throw error;
+                    res.send(results);
+                }
+            )
+        })
     }
 }
