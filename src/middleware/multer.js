@@ -39,7 +39,6 @@ const upload = multer({
 
 // Middleware untuk menghapus file lama sebelum mengunggah yang baru
 function uploadDeleteOld(req, res, next) {
-    // Cek apakah ada file lama yang perlu dihapus
     if (req.file && req.file.filename) {
         const oldFilePath = path.join(__dirname, "./../files/", req.file.filename);
         // Hapus file lama
@@ -49,7 +48,6 @@ function uploadDeleteOld(req, res, next) {
             } else {
                 console.log('File lama berhasil dihapus');
             }
-            // Lanjutkan proses upload file baru
             upload(req, res, next);
         });
     } else {

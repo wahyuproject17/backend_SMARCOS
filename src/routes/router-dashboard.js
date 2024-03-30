@@ -5,7 +5,7 @@ const verifyUser = require('../initializers/verify');
 
 router.get('/', verifyUser.isLogin, dashboardController.Dashboard);
 router.post('/add-ikan', verifyUser.isLogin, dashboardController.createIkan);
-router.put('/edit-ikan/:id', dashboardController.editIkan);
+router.put('/edit-ikan/:id', verifyUser.isLogin, dashboardController.editIkan);
 router.delete('/delete-ikan/:id', verifyUser.isLogin, dashboardController.deleteIkan);
 
 router.put('/edit-tulisan/:id', verifyUser.isLogin, tulisanController.editTulisan);
