@@ -33,9 +33,29 @@ module.exports ={
         }
     },
     editTulisan(req, res){
+        let id = req.params.id;
+        let ucapan = req.body.ucapan;
+        let alamat = req.body.alamat;
+        let telepon = req.body.telepon;
+        let instagram = req.body.instagram;
+        let email = req.body.email;
 
-    },
-    deleteTulisan(req, res){
-        
+        if (ucapan && alamat && telepon && instagram && email && id) {
+            pool.getConnection(function(err, connection) {
+                if (err) throw err;
+                connection.query(
+                    `UPDATE tbl_tulisan SET ucapan=?, alamat=?, telepon=?, instagram=?, email=? WHERE id=?;`,
+                    [ucapan, alamat, telepon, instagram, email, id],
+                    function(error, results) {
+                        if (error) throw error;
+                        req.flash('color', 'success');
+                        req.flash('status', 'Yes..');
+                        req.flash('message', 'Pengeditan berhasil');
+                        
+                        res.redirect('/');
+                    }
+                )
+            })
+        }
     }
 }

@@ -1,10 +1,13 @@
 const router = require('express').Router();
 const dashboardController = require('../controllers').dashboard;
+const tulisanController = require('../controllers').tulisan;
 const verifyUser = require('../initializers/verify');
 
 router.get('/', verifyUser.isLogin, dashboardController.Dashboard);
-router.post('/add-ikan', dashboardController.createIkan);
-router.put('/edit-ikan', verifyUser.isLogin, dashboardController.editIkan);
-router.delete('/delete-ikan', verifyUser.isLogin, dashboardController.deleteIkan);
+router.post('/add-ikan', verifyUser.isLogin, dashboardController.createIkan);
+router.put('/edit-ikan/:id', dashboardController.editIkan);
+router.delete('/delete-ikan/:id', verifyUser.isLogin, dashboardController.deleteIkan);
+
+router.put('/edit-tulisan/:id', verifyUser.isLogin, tulisanController.editTulisan);
 
 module.exports = router;

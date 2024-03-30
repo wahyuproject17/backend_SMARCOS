@@ -1,5 +1,5 @@
 const database = require('../initializers/database');
-const upload = require('../middleware/multer');
+const uploadDeleteOld = require('../middleware/multer');
 
 let mysql = require('mysql');
 let pool = mysql.createPool(database);
@@ -14,7 +14,7 @@ module.exports = {
         let data_suhu = req.body.suhuair;
     },
     createIkan(req, res, next){
-        upload(req, res, function (err) {
+        uploadDeleteOld(req, res, function (err) {
             if (err) {
                 // Jika terjadi kesalahan saat upload file
                 req.flash('color', 'danger');
@@ -53,7 +53,7 @@ module.exports = {
         });
     },
     editIkan(req, res){
-        upload(req, res, function (err) {
+        uploadDeleteOld(req, res, function (err) {
             if (err) {
                 req.flash('color', 'danger');
                 req.flash('status', 'Oops..');
