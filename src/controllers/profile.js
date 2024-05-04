@@ -9,12 +9,12 @@ pool.on('error',(err)=> {
 
 module.exports ={
     Profile(req,res){
-        let id_user = req.session.usersid
+        let id_user = req.session.userid
         pool.getConnection(function(err, connection) {
             if (err) throw err;
             connection.query(
                 `
-                SELECT * FROM user_register where user_id = '${id_user}';
+                SELECT * FROM tbl-user where user_id = '${id_user}';
                 `
             , function (error, results) {
                 if(error) throw error;

@@ -3,8 +3,9 @@ const user = require('./user');
 const home = require('./home');
 const profile = require('./profile');
 const dashboard = require('./dashboard');
-const tulisan = require('./tulisan')
+const tulisan = require('./tulisan');
 const admin = require('./admin');
+const order = require('./order');
 
 module.exports ={
 	authentication,
@@ -13,5 +14,6 @@ module.exports ={
 	profile,
 	dashboard,
 	tulisan,
-	admin
+	admin,
+	order
 };
