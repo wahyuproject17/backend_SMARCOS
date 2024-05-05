@@ -14,6 +14,7 @@ const adminRoutes = require('./src/routes/router-admin')
 const authRoutes = require('./src/routes/router-authentication')
 const appRoutes = require('./src/routes/router-app')
 const dashboardRoutes = require('./src/routes/router-dashboard')
+const orderRoutes = require('./src/routes/router-order')
 
 //view engine
 app.set('view engine', 'ejs');
@@ -40,6 +41,7 @@ app.use('/auth', authRoutes)
 app.use('/user', userRoutes)
 app.use('/dashboard', dashboardRoutes)
 app.use('/admin', adminRoutes)
+app.use('/order', orderRoutes)
 app.use('/', appRoutes)
 
 app.listen(port, () => {
