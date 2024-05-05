@@ -36,7 +36,7 @@ module.exports ={
         pool.getConnection(function(err, connection){
             if (err) throw error;
             connection.query(
-                `SELECT * FROM tbl_user`, function(error, result){
+                `SELECT * FROM tbl_pesanan, tbl_user`, function(error, result){
                     if (error) throw error;
 
                     res.send(result)
@@ -49,7 +49,7 @@ module.exports ={
         pool.getConnection(function(err, connection){
             if (err) throw error;
             connection.query(
-                `SELECT * FROM tbl_pesanan WHERE id_pesanan = ?`, [id], function(error, result){
+                `SELECT * FROM tbl_pesanan, tbl_user WHERE id_pesanan = ?`, [id], function(error, result){
                     if (error) throw error;
 
                     res.send(result)
