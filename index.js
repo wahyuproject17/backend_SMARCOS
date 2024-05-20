@@ -4,7 +4,7 @@ const app = express()
 const session = require('express-session')
 const path = require('path')
 const flash = require('req-flash')
-const port = 3000
+const port = 5000
 const bodyParser = require('body-parser')
 require ('dotenv').config()
 
