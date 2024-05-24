@@ -9,51 +9,70 @@ pool.on('error',(err)=> {
 });
 
 module.exports ={
-    Login(req,res){
+
+    Login(req, res) {
         let email = req.body.email;
         let password = req.body.pass;
+    
         if (email && password) {
-            let hashedPassword = hashPassword(password);
-            pool.getConnection(function(err, connection) {
+            pool.getConnection(function (err, connection) {
                 if (err) throw err;
+                // Cek apakah pengguna adalah admin
                 connection.query(
-                    `SELECT * FROM tbl_admin WHERE email = ? AND password = ?`,
-                     [email, hashedPassword], function (error, results) {
-                    if (error) throw error;
-                    if (!results.length == 0) {
-                        req.session.loggedin = true;
-                        req.session.level = 1;
-                        req.session.userid = results[0].id_user;
-                        req.session.username = results[0].username;
-                        res.redirect('/');
-                    } else {
-                        connection.query(
-                            `SELECT * FROM tbl_user WHERE email = ? AND password = ?`,
-                             [email, hashedPassword], function(error, results){
-                                if(error) throw error;
-                                if (!results.length == 0){
-                                    req.session.loggedin = true;
-                                    req.session.level = 2;
-                                    req.session.userid = results[0].id_admin;
-                                    req.session.username = results[0].username;
-                                    res.redirect('/');
+                    `SELECT * FROM tbl_admin WHERE email = ?`, [email], function (error, adminResults) {
+                        if (error) throw error;
+    
+                        if (adminResults.length > 0) {
+                            if (adminResults[0].password === hashPassword(password)) {
+                                req.session.loggedin = true;
+                                req.session.level = 1; // Level 1 untuk admin
+                                req.session.userid = adminResults[0].id_admin;
+                                req.session.username = adminResults[0].username;
+                                res.json({ success: true, message: 'Login berhasil sebagai admin' });
+                                connection.release();
+                                return; // Keluar dari fungsi setelah login berhasil
+                            } else {
+                                res.json({ success: false, message: 'Email atau password anda salah!' });
+                                connection.release();
+                                return; // Keluar dari fungsi setelah login gagal
+                            }
+                        } else {
+                            // Cek apakah pengguna adalah user
+                            connection.query(
+                                `SELECT * FROM tbl_user WHERE email = ?`, [email], function (error, userResults) {
+                                    if (error) throw error;
+    
+                                    if (userResults.length > 0) {
+                                        if (userResults[0].password === hashPassword(password)) {
+                                            req.session.loggedin = true;
+                                            req.session.level = 2; // Level 2 untuk user
+                                            req.session.userid = userResults[0].id_user;
+                                            req.session.username = userResults[0].username;
+                                            res.json({ success: true, message: 'Login berhasil sebagai user' });
+                                            connection.release();
+                                            return; // Keluar dari fungsi setelah login berhasil
+                                        } else {
+                                            res.json({ success: false, message: 'Email atau password anda salah!' });
+                                            connection.release();
+                                            return; // Keluar dari fungsi setelah login gagal
+                                        }
+                                    } else {
+                                        // Jika tidak ada pengguna dengan email tersebut
+                                        res.json({ success: false, message: 'Email atau password anda salah!' });
+                                        connection.release();
+                                        return; // Keluar dari fungsi setelah login gagal
+                                    }
                                 }
-                                else{
-                                    req.flash('color', 'danger');
-                                    req.flash('status', 'Oops..');
-                                    req.flash('message', 'Email atau password anda salah!');
-                                    res.redirect('/login');
-                                }
-                             }
-                        )
+                            );
+                        }
                     }
-                });
-                connection.release();
-            })
+                );
+            });
         } else {
-            res.redirect('/login');
+            res.json({ success: false, message: 'Masukkan email dan password!' });
         }
-    },
+    }    
+,
     Logout(req,res){
         req.session.destroy((err) => {
             if(err) {

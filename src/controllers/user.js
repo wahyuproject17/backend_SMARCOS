@@ -34,7 +34,7 @@ module.exports ={
             )
         })
     },
-    createUser(req,res){
+    createUser(req, res) {
         let username = req.body.username;
         let nama_lengkap = req.body.namalengkap;
         let no_hp = req.body.nohp;
@@ -42,32 +42,37 @@ module.exports ={
         let jenkel = req.body.jenkel;
         let alamat = req.body.alamat;
         let password = req.body.pass;
-
-        if (username && nama_lengkap && no_hp && email && alamat && password) {
     
+        console.log("Request Data: ", req.body); // Log data yang diterima
+    
+        if (username && nama_lengkap && no_hp && email && alamat && password) {
             pool.getConnection(function(err, connection) {
-                if (err) throw err;
+                if (err) {
+                    console.error('Database connection error:', err);
+                    res.status(500).json({ success: false, message: 'Database connection failed' });
+                    return;
+                }
+    
                 connection.query(
-                    `INSERT INTO tbl_user (username, nama_lengkap, no_hp, email, jenkel, alamat, password) VALUES (?,?,?,?,?,?,SHA2(?,512));`
-                , [username, nama_lengkap, no_hp, email, jenkel, alamat, password],function (error, results) {
-                    if (error) throw error;
-              
-                    req.flash('color', 'success');
-                    req.flash('status', 'Yes..');
-                    req.flash('message', 'Registrasi berhasil');
-                    
-                    res.redirect('/login');
-                });
-              
-                connection.release();
-            })
+                    `INSERT INTO tbl_user (username, nama_lengkap, no_hp, email, jenkel, alamat, password) VALUES (?,?,?,?,?,?,SHA2(?,512));`,
+                    [username, nama_lengkap, no_hp, email, jenkel, alamat, password],
+                    function (error, results) {
+                        connection.release();
+    
+                        if (error) {
+                            console.error('Error inserting data:', error);
+                            res.status(500).json({ success: false, message: 'Error inserting data' });
+                            return;
+                        }
+    
+                        console.log('User registered successfully');
+                        res.status(200).json({ success: true, message: 'Registrasi berhasil' });
+                    }
+                );
+            });
         } else {
-            req.flash('color', 'danger');
-            req.flash('status', 'gagal');
-            req.flash('message', 'Username atau No Hp atau Email sudah digunakan');
-            
-            res.redirect('/login');
-            res.end();
+            console.log('Missing required fields');
+            res.status(400).json({ success: false, message: 'Missing required fields' });
         }
     },
     updateUser(req, res){
