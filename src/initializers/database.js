@@ -1,3 +1,4 @@
+require('dotenv').config();
 const conn = {
     multipleStatement: true,
     host: process.env.db_host,
