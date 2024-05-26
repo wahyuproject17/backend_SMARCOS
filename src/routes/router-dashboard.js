@@ -4,6 +4,8 @@ const tulisanController = require('../controllers').tulisan;
 const verifyUser = require('../initializers/verify');
 
 router.get('/', verifyUser.isLogin, dashboardController.Dashboard);
+router.get('/get-ikan', dashboardController.getIkan);
+router.get('/get-ikan/:id', verifyUser.isLogin, dashboardController.getIkanById);
 router.post('/add-ikan', verifyUser.isLogin, dashboardController.createIkan);
 router.put('/edit-ikan/:id', verifyUser.isLogin, dashboardController.editIkan);
 router.delete('/delete-ikan/:id', verifyUser.isLogin, dashboardController.deleteIkan);

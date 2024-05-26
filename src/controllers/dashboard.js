@@ -13,6 +13,32 @@ module.exports = {
         let data_ph = req.body.phair;
         let data_suhu = req.body.suhuair;
     },
+    getIkan(req, res){
+        pool.getConnection(function(err, connection){
+            if (err) throw error;
+            connection.query(
+                `SELECT * FROM tbl_ikan`, function(error, result){
+                    if (error) throw error;
+
+                    res.send(result)
+                }
+            )
+        });
+    },
+    getIkanById(req, res){
+        const userid = req.params.id;
+        pool.getConnection(function(err, connection){
+            if (err) throw error;
+            connection.query(
+                `SELECT * FROM tbl_ikan WHERE id_ikan=?`, [userid],
+                function(error, result){
+                    if(error) throw error;
+
+                    res.send(result)
+                }
+            )
+        })
+    },
     createIkan(req, res, next){
         uploadDeleteOld(req, res, function (err) {
             if (err) {
