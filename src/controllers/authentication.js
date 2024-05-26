@@ -22,7 +22,7 @@ module.exports ={
                     `SELECT * FROM tbl_admin WHERE email = ?`, [email], function (error, adminResults) {
                         if (error) throw error;
     
-                        if (adminResults.length > 0) {
+                        if (adminResults.length == !null) {
                             if (adminResults[0].password === hashPassword(password)) {
                                 req.session.loggedin = true;
                                 req.session.level = 1; // Level 1 untuk admin

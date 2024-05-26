@@ -7,6 +7,9 @@ const cors = require('cors')
 const flash = require('req-flash')
 const port = 5000
 const bodyParser = require('body-parser')
+const MySQLStore = require('express-mysql-session')(session);
+const mysql = require('mysql');
+
 require ('dotenv').config()
 
 //router
@@ -20,6 +23,26 @@ const orderRoutes = require('./src/routes/router-order')
 //view engine
 app.set('view engine', 'ejs');
 
+const dbOptions = {
+  host: 'localhost',
+  user: 'root',
+  password: '', // Ganti dengan password MySQL Anda
+  database: 'db_smarcos'
+};
+
+// Tes koneksi ke database
+const connection = mysql.createConnection(dbOptions);
+connection.connect(function(err) {
+  if (err) {
+      console.error('Error connecting to MySQL: ', err.stack);
+      return;
+  }
+  console.log('Connected to MySQL as id ' + connection.threadId);
+});
+
+// Buat penyimpanan sesi MySQL
+const sessionStore = new MySQLStore(dbOptions, connection);
+
 //body parser
 app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
@@ -31,9 +54,10 @@ app.use(session({
   saveUninitialized: false,
   secret: 'w@hyou',
   name: 'secretName',
+  store: sessionStore,
   cookie: {
     sameSite: true,
-    maxAge: 60000
+    maxAge: 1000 * 60 * 60 * 1 // Sesi berlaku selama 1 hari
   }
 }))
 app.use(flash())
