@@ -1,6 +1,8 @@
 const { hashPassword } = require('../utils/hashPassword');
 const database = require('../initializers/database');
 const mysql = require('mysql');
+const jwt = require('jsonwebtoken');
+
 
 let pool = mysql.createPool(database);
 
@@ -36,7 +38,16 @@ module.exports = {
                             req.session.level = 1; // Level 1 untuk admin
                             req.session.userid = adminResults[0].id_admin;
                             req.session.username = adminResults[0].username;
-                            res.json({ success: true, level: req.session.level, message: 'Login berhasil sebagai admin' });
+
+                            const token = jwt.sign({ 
+                                email: email, 
+                                level: req.session.level, 
+                                userid: req.session.userid
+                            }, process.env.JWT_SECRET, { expiresIn: '1h' });
+                            
+                            // Simpan token dalam sesi
+                            req.session.token = token;
+                            res.json({ success: true, level: req.session.level, token: req.session.token, message: 'Login berhasil sebagai user' });
                         } else {
                             res.json({ success: false, message: 'Email atau password anda salah!' });
                         }
@@ -57,7 +68,19 @@ module.exports = {
                                     req.session.level = 2; // Level 2 untuk user
                                     req.session.userid = userResults[0].id_user;
                                     req.session.username = userResults[0].username;
-                                    res.json({ success: true, level: req.session.level, message: 'Login berhasil sebagai user' });
+
+                                    const token = jwt.sign({ 
+                                        email: email, 
+                                        level: req.session.level, 
+                                        userid: req.session.userid
+                                    }, process.env.JWT_SECRET, { expiresIn: '1h' });
+                                    
+                                    // Simpan token dalam sesi
+                                    req.session.token = token;
+
+                                    res.json({ success: true, level: req.session.level, token: req.session.token, message: 'Login berhasil sebagai user' });
+
+                                    return;
                                 } else {
                                     res.json({ success: false, message: 'Email atau password anda salah!' });
                                 }
