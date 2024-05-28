@@ -8,30 +8,75 @@ pool.on('error',(err)=> {
 });
 
 module.exports ={
-    createOrder(req, res){
-        let id_user = req.session.userid;
+    createOrder(req, res) {
+        let id_user = req.body.userid;
         let jenisikan = req.body.jenisikan;
         let jumlahikan = req.body.jumlah;
         let hargasatuan = req.body.hargaikan;
         let harga = jumlahikan * hargasatuan;
-
-        if(id_user && jenisikan && jumlahikan && harga){
-            pool.getConnection(function(err, connection){
-                if (err) throw error;
-                connection.query(
-                    `INSERT INTO tbl_pesanan(id_user, jenis_ikan, jumlah_ikan, harga) VALUES (?,?,?,?); `,
-                    [id_user, jenisikan, jumlahikan, harga], function (error, results){
-                        if (error) throw error;
-                        req.flash('color', 'success');
-                        req.flash('status', 'Yes..');
-                        req.flash('message', 'Pesanan berhasil ditambahkan');
-                    
-                        res.redirect('/');
+    
+        if (id_user && jenisikan && jumlahikan && harga) {
+            pool.getConnection(function (err, connection) {
+                if (err) throw err;
+    
+                connection.beginTransaction(function (err) {
+                    if (err) {
+                        connection.release();
+                        throw err;
                     }
-                )
-            })
+    
+                    // Insert ke dalam tabel pesanan
+                    connection.query(
+                        `INSERT INTO tbl_pesanan(id_user, jenis_ikan, jumlah_ikan, harga) VALUES (?, ?, ?, ?);`,
+                        [id_user, jenisikan, jumlahikan, harga],
+                        function (error, results) {
+                            if (error) {
+                                return connection.rollback(function () {
+                                    connection.release();
+                                    throw error;
+                                });
+                            }
+    
+                            // Update jumlah ikan di tabel ikan
+                            connection.query(
+                                `UPDATE tbl_ikan SET jumlah_ikan = jumlah_ikan - ? WHERE jenis_ikan = ?;`,
+                                [jumlahikan, jenisikan],
+                                function (error, result) {
+                                    if (error) {
+                                        return connection.rollback(function () {
+                                            connection.release();
+                                            throw error;
+                                        });
+                                    }
+    
+                                    connection.commit(function (err) {
+                                        if (err) {
+                                            return connection.rollback(function () {
+                                                connection.release();
+                                                throw err;
+                                            });
+                                        }
+    
+                                        req.flash('color', 'success');
+                                        req.flash('status', 'Yes..');
+                                        req.flash('message', 'Pesanan berhasil ditambahkan dan jumlah ikan berhasil diperbarui');
+                                        res.redirect('/shop'); // Tambahkan path redirect yang sesuai
+                                        connection.release();
+                                    });
+                                }
+                            );
+                        }
+                    );
+                });
+            });
+        } else {
+            req.flash('color', 'danger');
+            req.flash('status', 'No..');
+            req.flash('message', 'Data tidak lengkap');
+            res.redirect('/path_to_redirect'); // Tambahkan path redirect yang sesuai
         }
-    },
+    }
+    ,
     getOrder(req, res){
         pool.getConnection(function(err, connection){
             if (err) throw error;
