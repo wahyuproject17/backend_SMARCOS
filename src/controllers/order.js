@@ -9,7 +9,7 @@ pool.on('error',(err)=> {
 
 module.exports ={
     createOrder(req, res) {
-        let id_user = req.body.userid;
+        let id_user = req.session.userid;
         let jenisikan = req.body.jenisikan;
         let jumlahikan = req.body.jumlah;
         let hargasatuan = req.body.hargaikan;

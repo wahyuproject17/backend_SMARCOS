@@ -5,14 +5,14 @@ module.exports = {
         return
     }else{
         req.session.destroy(function(err){
-            res.redirect('/login')
+            return;
         })
     }
 },
     isLogout(req, res, next){
         if(req.session.loggedin !== true){
             next()
-            return
+            return;
         }
         res.redirect('/')
     }
