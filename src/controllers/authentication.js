@@ -2,6 +2,7 @@ const { hashPassword } = require('../utils/hashPassword');
 const database = require('../initializers/database');
 const mysql = require('mysql');
 const generateJWT = require('../config/generateJWT');
+const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 let pool = mysql.createPool(database);
@@ -34,15 +35,23 @@ module.exports = {
 
                     if (adminResults.length > 0) {
                         if (adminResults[0].password === hashPassword(password)) {
+                            const username = adminResults[0].username; // Ambil username admin
                             const token = generateJWT({ 
                                 email: email, 
                                 level: 1, // Level 1 untuk admin
-                                userid: adminResults[0].id_admin
+                                userid: adminResults[0].id_admin,
+                                username: username // Sertakan username dalam token
                             });
 
                             // Send the JWT token in the Authorization header
                             res.header('Authorization', `Bearer ${token}`);
-                            res.json({ success: true, level: 1, token: token, message: 'Login berhasil sebagai admin' });
+                            res.json({ 
+                                success: true, 
+                                level: 1, 
+                                token: token, 
+                                message: 'Login berhasil sebagai admin',
+                                username: username // Sertakan username dalam respons
+                            });
                         } else {
                             res.json({ success: false, message: 'Email atau password anda salah!' });
                         }
@@ -59,15 +68,23 @@ module.exports = {
 
                             if (userResults.length > 0) {
                                 if (userResults[0].password === hashPassword(password)) {
+                                    const username = userResults[0].username; // Ambil username user
                                     const token = generateJWT({ 
                                         email: email, 
                                         level: 2, // Level 2 untuk user
-                                        userid: userResults[0].id_user
+                                        userid: userResults[0].id_user,
+                                        username: username // Sertakan username dalam token
                                     });
 
                                     // Send the JWT token in the Authorization header
                                     res.header('Authorization', `Bearer ${token}`);
-                                    res.json({ success: true, level: 2, token: token, message: 'Login berhasil sebagai user' });
+                                    res.json({ 
+                                        success: true, 
+                                        level: 2, 
+                                        token: token, 
+                                        message: 'Login berhasil sebagai user',
+                                        username: username // Sertakan username dalam respons
+                                    });
                                 } else {
                                     res.json({ success: false, message: 'Email atau password anda salah!' });
                                 }
@@ -93,7 +110,6 @@ module.exports = {
                 return res.json({ success: false, message: 'Logout gagal' });
             }
             res.clearCookie('secretname');
-            res.redirect('/login');
         });
     },
 
