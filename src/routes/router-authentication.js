@@ -4,7 +4,7 @@ const authController = require('../controllers').authentication;
 
 router.get('/logout', verifyUser.isLogin, authController.Logout);
 
-router.post('/login', authController.Login);
+router.post('/login', verifyUser.isLogout, authController.Login);
 
 // Endpoint untuk memeriksa status login
 router.get('/status', authController.authenticateToken, (req, res) => {
