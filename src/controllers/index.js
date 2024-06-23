@@ -4,6 +4,7 @@ const dashboard = require('./dashboard');
 const tulisan = require('./tulisan');
 const admin = require('./admin');
 const order = require('./order');
+const galery = require('./galeri');
 
 module.exports ={
 	authentication,
@@ -11,5 +12,6 @@ module.exports ={
 	dashboard,
 	tulisan,
 	admin,
-	order
+	order,
+	galery
 };

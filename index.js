@@ -20,6 +20,7 @@ const authRoutes = require('./src/routes/router-authentication');
 const appRoutes = require('./src/routes/router-app');
 const dashboardRoutes = require('./src/routes/router-dashboard');
 const orderRoutes = require('./src/routes/router-order');
+const galeryRoutes = require('./src/routes/router-galery');
 
 // view engine
 app.set('view engine', 'ejs');
@@ -56,12 +57,16 @@ app.use(session({
 }));
 app.use(flash());
 
+// Untuk melayani file gambar
+app.use('/uploads', express.static('uploads'));
+
 // routes
 app.use('/auth', authRoutes);
 app.use('/user', userRoutes);
 app.use('/dashboard', dashboardRoutes);
 app.use('/admin', adminRoutes);
 app.use('/order', orderRoutes);
+app.use('/gallery', galeryRoutes);
 app.use('/', appRoutes);
 
 app.listen(port, () => {
