@@ -96,7 +96,7 @@ module.exports = {
     const galleryId = req.params.id;
     pool.getConnection(function (err, connection) {
       if (err) throw err;
-      connection.query(`DELETE FROM tbl_gallery WHERE id = ?`, [galleryId], function (error, results) {
+      connection.query(`DELETE FROM tbl_gallery WHERE id_gallery = ?`, [galleryId], function (error, results) {
         if (error) throw error;
         res.send({ message: 'Gallery item deleted successfully' });
       });

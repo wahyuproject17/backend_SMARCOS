@@ -1,12 +1,27 @@
 const database = require('../initializers/database');
-const uploadDeleteOld = require('../middleware/multer');
-
+const path = require('path');
+const multer = require('multer');
 let mysql = require('mysql');
 let pool = mysql.createPool(database);
 
 pool.on('error', (err) => {
     console.error(err);
 });
+
+// Konfigurasi Multer untuk upload gambar
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, 'uploads/');
+  },
+  filename: function (req, file, cb) {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  }
+});
+
+const upload = multer({ storage: storage });
+
+// Ekspor middleware untuk upload gambar
+module.exports.uploadImage = upload.single('foto'); // 'foto' adalah nama field file pada form data
 
 module.exports = {
     Dashboard(req, res){
@@ -40,97 +55,58 @@ module.exports = {
         })
     },
     createIkan(req, res, next){
-        uploadDeleteOld(req, res, function (err) {
-            if (err) {
-                // Jika terjadi kesalahan saat upload file
-                req.flash('color', 'danger');
-                req.flash('status', 'Oops..');
-                req.flash('message', err.message || 'Terjadi kesalahan saat mengunggah file.');
-                return res.redirect('/');
-            }
-            
-            let jenis_ikan = req.body.jenisikan;
-    
-            if (jenis_ikan){
-                pool.getConnection(function(err, connection){
-                    if (err) throw err;
-                    connection.query(
-                        `INSERT INTO tbl_ikan (jenis_ikan, foto_ikan) VALUES (?,?);`,
-                        [jenis_ikan, req.file.path], function (error, result){
-                            if (error) throw error;
-                  
-                            req.flash('color', 'success');
-                            req.flash('status', 'Yes..');
-                            req.flash('message', 'Input berhasil');
-                        
-                            res.redirect('/');
-                    });
-                  
-                    connection.release();
-                })
-            } else {
-                req.flash('color', 'danger');
-                req.flash('status', 'Oops..');
-                req.flash('message', 'Data yang dimasukkan tidak lengkap!');
-                res.redirect('/');
-            }
-        });
-    },
-    editIkan(req, res){
-        uploadDeleteOld(req, res, function (err) {
-            if (err) {
-                req.flash('color', 'danger');
-                req.flash('status', 'Oops..');
-                req.flash('message', err.message || 'Terjadi kesalahan saat mengunggah file.');
-                return res.redirect('/' + req.params.id);
-            }
-    
-            let id_ikan = req.params.id;
-            let jenis_ikan = req.body.jenisikan;
-    
-            if (jenis_ikan){
-                pool.getConnection(function(err, connection){
-                    if (err) throw err;
-                    connection.query(
-                        `UPDATE tbl_ikan SET jenis_ikan=?, foto_ikan=? WHERE id_ikan=?;`,
-                        [jenis_ikan, req.file ? req.file.path : null, id_ikan], function (error, result){
-                            if (error) throw error;
-                  
-                            req.flash('color', 'success');
-                            req.flash('status', 'Yes..');
-                            req.flash('message', 'Data ikan berhasil diperbarui');
-                        
-                            res.redirect('/');
-                    });
-                  
-                    connection.release();
-                })
-            } else {
-                req.flash('color', 'danger');
-                req.flash('status', 'Oops..');
-                req.flash('message', 'Data yang dimasukkan tidak lengkap!');
-                res.redirect('/editIkan/' + id);
-            }
-        });
+        const { jenis_ikan } = req.body;
+        const foto_ikan = req.file ? req.file.path : null;
+
+        if (jenis_ikan && foto_ikan) {
+            pool.getConnection(function (err, connection) {
+            if (err) throw err;
+            connection.query(
+                `INSERT INTO tbl_ikan (jenis_ikan, foto_ikan) VALUES (?, ?)`,
+                [jenis_ikan, foto_ikan],
+                function (error, results) {
+                if (error) throw error;
+                res.send({ message: 'Fish added successfully', id: results.insertId });
+                }
+            );
+            connection.release();
+            });
+        } else {
+            res.status(400).send({ message: 'All fields are required' });
+        }
+            },
+        editIkan(req, res){
+        const fishId = req.params.id;
+        const { jenis_ikan } = req.body;
+        const foto_ikan = req.file ? req.file.path : null;
+
+        if (jenis_ikan) {
+            pool.getConnection(function (err, connection) {
+            if (err) throw err;
+            connection.query(
+                `UPDATE tbl_ikan SET jenis_ikan = ?, foto_ikan = COALESCE(?, foto_ikan) WHERE id_ikan = ?`,
+                [jenis_ikan, foto_ikan, fishId],
+                function (error, results) {
+                if (error) throw error;
+                res.send({ message: 'Fish data updated successfully' });
+                }
+            );
+            connection.release();
+            });
+        } else {
+            res.status(400).send({ message: 'All fields are required' });
+        }
     },
     deleteIkan(req, res){
-        let id_ikan = req.params.id;
-        if(id_ikan){
-            pool.getConnection(function(err, connection){
-                if (err) throw error;
-                connection.query(
-                    `DELETE FROM tbl_ikan WHERE id_ikan = ?`, [id_ikan],
-                    function(error, result){
-                        if (error) throw error;
-                        req.flash('color', 'success');
-                        req.flash('status', 'Yes..');
-                        req.flash('message', 'Penghapusan berhasil');
-
-                        res.redirect('/');
-                    }
-                )
-            })
-        }
+        const fishId = req.params.id;
+        pool.getConnection(function (err, connection) {
+            if (err) throw err;
+            connection.query(`DELETE FROM tbl_ikan WHERE id_ikan = ?`, [fishId], function (error, results) {
+            if (error) throw error;
+            res.send({ message: 'Fish data deleted successfully' });
+            });
+            connection.release();
+        });
     },
     createBenih(req, res){            
             let id_ikan = req.body.id_ikan;
@@ -150,8 +126,6 @@ module.exports = {
                             req.flash('color', 'success');
                             req.flash('status', 'Yes..');
                             req.flash('message', 'Input berhasil');
-                        
-                            res.redirect('/');
                     });
                   
                     connection.release();
@@ -160,7 +134,6 @@ module.exports = {
                 req.flash('color', 'danger');
                 req.flash('status', 'Oops..');
                 req.flash('message', 'Data yang dimasukkan tidak lengkap!');
-                res.redirect('/');
             }
         },
     editBenih(req, res) {
@@ -409,6 +382,30 @@ module.exports = {
                     res.send(result)
                 }
             )
+        });
+    },
+    getAllIkan(req, res) {
+        pool.getConnection(function(err, connection) {
+            if (err) throw err;
+            
+            // Query untuk tbl_benih
+            connection.query(`SELECT tbl_ikan.*, tbl_benih.* FROM tbl_ikan INNER JOIN tbl_benih ON tbl_ikan.id_ikan = tbl_benih.id_ikan;`, function(error_benih, result_benih) {
+                if (error_benih) throw error_benih;
+    
+                // Query untuk tbl_konsumsi
+                connection.query(`SELECT tbl_ikan.*, tbl_konsumsi.* FROM tbl_ikan INNER JOIN tbl_konsumsi ON tbl_ikan.id_ikan = tbl_konsumsi.id_ikan;`, function(error_konsumsi, result_konsumsi) {
+                    if (error_konsumsi) throw error_konsumsi;
+    
+                    // Gabungkan hasil dari kedua query
+                    res.send({
+                        benih: result_benih,
+                        konsumsi: result_konsumsi
+                    });
+                });
+            });
+            
+            // Lepaskan koneksi setelah selesai
+            connection.release();
         });
     },
     getTotalIkan(req, res) {

@@ -21,6 +21,8 @@ router.post('/add-konsumsi', verifyUser.isLogin, dashboardController.createKonsu
 router.put('/edit-konsumsi/:id', verifyUser.isLogin, dashboardController.editKonsumsi);
 router.delete('/delete-konsumsi/:id', verifyUser.isLogin, dashboardController.deleteKonsumsi);
 
+router.get('/get-allikan', verifyUser.isLogin, dashboardController.getAllIkan);
+
 router.get('/tulisan', verifyUser.isLogin, tulisanController.showTulisan);
 router.post('/add-tulisan', verifyUser.isLogin, tulisanController.addTulisan);
 router.put('/edit-tulisan/:id', verifyUser.isLogin, tulisanController.editTulisan);
