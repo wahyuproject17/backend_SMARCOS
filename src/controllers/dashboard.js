@@ -20,10 +20,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Ekspor middleware untuk upload gambar
-module.exports.uploadImage = upload.single('foto'); // 'foto' adalah nama field file pada form data
-
 module.exports = {
+    uploadImage : upload.single('foto_ikan'), // 'foto' adalah nama field file pada form data
     Dashboard(req, res){
         let data_ph = req.body.phair;
         let data_suhu = req.body.suhuair;
@@ -55,9 +53,9 @@ module.exports = {
         })
     },
     createIkan(req, res, next){
-        const { jenis_ikan } = req.body;
+        const jenis_ikan = req.body.jenis_ikan;
         const foto_ikan = req.file ? req.file.path : null;
-
+        
         if (jenis_ikan && foto_ikan) {
             pool.getConnection(function (err, connection) {
             if (err) throw err;
@@ -77,7 +75,7 @@ module.exports = {
             },
         editIkan(req, res){
         const fishId = req.params.id;
-        const { jenis_ikan } = req.body;
+        const jenis_ikan = req.body.jenis_ikan;
         const foto_ikan = req.file ? req.file.path : null;
 
         if (jenis_ikan) {
@@ -110,7 +108,7 @@ module.exports = {
     },
     createBenih(req, res){            
             let id_ikan = req.body.id_ikan;
-            let ukuran = req.body.ukuran;
+            let ukuran = req.body.ukuran_ikan;
             let jumlah_ikan = req.body.jumlah_ikan;
             let harga_ikan = req.body.harga_ikan;
 
@@ -122,19 +120,14 @@ module.exports = {
                         ikan, harga_ikan) VALUES (?,?,?,?);`,
                         [id_ikan, ukuran, jumlah_ikan, harga_ikan], function (error, result){
                             if (error) throw error;
-                  
-                            req.flash('color', 'success');
-                            req.flash('status', 'Yes..');
-                            req.flash('message', 'Input berhasil');
-                    });
-                  
+                            res.send({ message: 'Fish data updated successfully' });
+                        }
+                    );
                     connection.release();
-                })
-            } else {
-                req.flash('color', 'danger');
-                req.flash('status', 'Oops..');
-                req.flash('message', 'Data yang dimasukkan tidak lengkap!');
-            }
+                    });
+                } else {
+                    res.status(400).send({ message: 'All fields are required' });
+                }
         },
     editBenih(req, res) {
         let id_benih = req.body.id_benih;
@@ -231,7 +224,8 @@ module.exports = {
         pool.getConnection(function(err, connection){
             if (err) throw error;
             connection.query(
-                `SELECT * FROM tbl_benih`, function(error, result){
+                `SELECT tbl_ikan.jenis_ikan, tbl_ikan.foto_ikan, tbl_benih.ukuran, tbl_benih.jumlah_ikan, tbl_benih.harga_ikan 
+                          FROM tbl_benih INNER JOIN tbl_ikan ON tbl_benih.id_ikan = tbl_ikan.id_ikan`, function(error, result){
                     if (error) throw error;
 
                     res.send(result)
@@ -376,7 +370,8 @@ module.exports = {
         pool.getConnection(function(err, connection){
             if (err) throw error;
             connection.query(
-                `SELECT * FROM tbl_konsumsi`, function(error, result){
+                `SELECT tbl_ikan.jenis_ikan, tbl_ikan.foto_ikan, tbl_konsumsi.jumlah_ikan, tbl_konsumsi.harga_ikan 
+                          FROM tbl_konsumsi INNER JOIN tbl_ikan ON tbl_konsumsi.id_ikan = tbl_ikan.id_ikan`, function(error, result){
                     if (error) throw error;
 
                     res.send(result)

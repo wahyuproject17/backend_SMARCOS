@@ -1,6 +1,6 @@
 const database = require('../initializers/database');
-let mysql = require('mysql');
-let pool = mysql.createPool(database);
+const mysql = require('mysql');
+const pool = mysql.createPool(database);
 
 pool.on('error', (err) => {
     console.error(err);
@@ -8,20 +8,22 @@ pool.on('error', (err) => {
 
 module.exports = {
     createOrder(req, res) {
-        let id_user = req.session.userid;
+        let id_user = req.userId;
         let jenisikan = req.body.jenisikan;
         let jumlahikan = req.body.jumlah;
         let hargasatuan = req.body.hargaikan;
         let harga = jumlahikan * hargasatuan;
-
-        if (id_user && jenisikan && jumlahikan && harga) {
+        let ukuran = req.body.ukuran;
+        let kategori = req.body.kategori; // Tambahkan kategori: 'benih' atau 'konsumsi'
+    
+        if (id_user && jenisikan && jumlahikan && harga && ukuran && kategori) {
             pool.getConnection(function (err, connection) {
                 if (err) {
                     console.error('Database connection error:', err);
                     res.status(500).json({ success: false, message: 'Database connection failed' });
                     return;
                 }
-
+    
                 connection.beginTransaction(function (err) {
                     if (err) {
                         connection.release();
@@ -29,11 +31,11 @@ module.exports = {
                         res.status(500).json({ success: false, message: 'Transaction failed' });
                         return;
                     }
-
+    
                     // Insert into tbl_pesanan
                     connection.query(
-                        `INSERT INTO tbl_pesanan(id_user, jenis_ikan, jumlah_ikan, harga) VALUES (?, ?, ?, ?);`,
-                        [id_user, jenisikan, jumlahikan, harga],
+                        `INSERT INTO tbl_pesanan(id_user, jenis_ikan, jumlah_ikan, ukuran, harga, kategori) VALUES (?, ?, ?, ?, ?, ?);`,
+                        [id_user, jenisikan, jumlahikan, ukuran, harga, kategori],
                         function (error, results) {
                             if (error) {
                                 return connection.rollback(function () {
@@ -42,10 +44,13 @@ module.exports = {
                                     res.status(500).json({ success: false, message: 'Insert failed' });
                                 });
                             }
-
-                            // Update jumlah ikan in tbl_ikan
+    
+                            // Pilih tabel berdasarkan kategori
+                            let updateTable = kategori === 'benih' ? 'tbl_benih' : 'tbl_konsumsi';
+    
+                            // Update jumlah ikan in the selected table
                             connection.query(
-                                `UPDATE tbl_ikan SET jumlah_ikan = jumlah_ikan - ? WHERE jenis_ikan = ?;`,
+                                `UPDATE ${updateTable} JOIN tbl_ikan i ON ${updateTable}.id_ikan = i.id_ikan SET ${updateTable}.jumlah_ikan = ${updateTable}.jumlah_ikan - ? WHERE i.jenis_ikan = ?;`,
                                 [jumlahikan, jenisikan],
                                 function (error, result) {
                                     if (error) {
@@ -55,7 +60,7 @@ module.exports = {
                                             res.status(500).json({ success: false, message: 'Update failed' });
                                         });
                                     }
-
+    
                                     connection.commit(function (err) {
                                         if (err) {
                                             return connection.rollback(function () {
@@ -64,7 +69,7 @@ module.exports = {
                                                 res.status(500).json({ success: false, message: 'Commit failed' });
                                             });
                                         }
-
+    
                                         console.log('Order created successfully and fish quantity updated');
                                         res.status(200).json({ success: true, message: 'Pesanan berhasil ditambahkan dan jumlah ikan berhasil diperbarui' });
                                         connection.release();

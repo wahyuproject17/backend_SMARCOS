@@ -11,7 +11,7 @@ module.exports = {
         pool.getConnection(function (err, connection) {
             if (err) throw err;
             connection.query(
-                `SELECT * FROM tbl_user`, function (error, result) {
+                `SELECT id_user, username, nama_lengkap, no_hp, email, jenkel, alamat FROM tbl_user`, function (error, result) {
                     connection.release();
                     if (error) throw error;
                     res.send(result);
@@ -24,7 +24,7 @@ module.exports = {
         pool.getConnection(function (err, connection) {
             if (err) throw err;
             connection.query(
-                `SELECT * FROM tbl_user WHERE id_user=?`, [userid],
+                `SELECT id_user, username, nama_lengkap, no_hp, email, jenkel, alamat FROM tbl_user WHERE id_user=?`, [userid],
                 function (error, result) {
                     connection.release();
                     if (error) throw error;
@@ -34,9 +34,7 @@ module.exports = {
         });
     },
     createUser(req, res) {
-        let { username, namalengkap: nama_lengkap, nohp: no_hp, email, jenkel, alamat, pass: password } = req.body;
-
-        console.log("Request Data: ", req.body); // Log data yang diterima
+        let { username, nama_lengkap, no_hp, email, jenkel, alamat, password } = req.body;
 
         if (username && nama_lengkap && no_hp && email && alamat && password) {
             pool.getConnection(function (err, connection) {
@@ -70,7 +68,7 @@ module.exports = {
     },
     updateUser(req, res) {
         let userid = req.params.id;
-        let { username, namalengkap: nama_lengkap, nohp: no_hp, email, jenkel, alamat, pass: password } = req.body;
+        let { username, nama_lengkap, no_hp, email, jenkel, alamat, password } = req.body;
 
         if (username && nama_lengkap && no_hp && email && alamat && password) {
             pool.getConnection(function (err, connection) {

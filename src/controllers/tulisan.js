@@ -44,15 +44,10 @@ module.exports ={
             pool.getConnection(function(err, connection) {
                 if (err) throw err;
                 connection.query(
-                    `UPDATE tbl_tulisan SET ucapan=?, alamat=?, telepon=?, instagram=?, email=? WHERE id=?;`,
+                    `UPDATE tbl_tulisan SET ucapan=?, alamat=?, telepon=?, instagram=?, email=? WHERE id_tulisan=?;`,
                     [ucapan, alamat, telepon, instagram, email, id],
                     function(error, results) {
                         if (error) throw error;
-                        req.flash('color', 'success');
-                        req.flash('status', 'Yes..');
-                        req.flash('message', 'Pengeditan berhasil');
-                        
-                        res.redirect('/');
                     }
                 )
             })

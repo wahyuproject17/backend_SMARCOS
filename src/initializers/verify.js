@@ -35,5 +35,24 @@ module.exports = {
                 }
             });
         }
+    },
+    // Middleware untuk memeriksa dan menyimpan ID pengguna dari token
+    checkAuth(req, res, next) {
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1];
+
+        if (!token) {
+            return res.status(401).json({ success: false, message: 'Token not provided' });
+        }
+
+        jwt.verify(token, JWT_SECRET, (err, decodedToken) => {
+            if (err) {
+                console.error('Token verification failed:', err);
+                return res.status(403).json({ success: false, message: 'Token is not valid' });
+            }
+            // Simpan ID pengguna dari token ke request object
+            req.userId = decodedToken.userid; // Sesuaikan dengan payload token Anda
+            next(); // Lanjut ke middleware berikutnya atau handler route
+        });
     }
 };
