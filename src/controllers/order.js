@@ -16,7 +16,7 @@ module.exports = {
         let ukuran = req.body.ukuran;
         let kategori = req.body.kategori; // Tambahkan kategori: 'benih' atau 'konsumsi'
     
-        if (id_user && jenisikan && jumlahikan && harga && ukuran && kategori) {
+        if (id_user && jenisikan && jumlahikan && harga && kategori) {
             pool.getConnection(function (err, connection) {
                 if (err) {
                     console.error('Database connection error:', err);
@@ -46,7 +46,7 @@ module.exports = {
                             }
     
                             // Pilih tabel berdasarkan kategori
-                            let updateTable = kategori === 'benih' ? 'tbl_benih' : 'tbl_konsumsi';
+                            let updateTable = kategori === 'Benih' ? 'tbl_benih' : 'tbl_konsumsi';
     
                             // Update jumlah ikan in the selected table
                             connection.query(

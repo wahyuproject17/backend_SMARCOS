@@ -54,14 +54,16 @@ module.exports = {
     },
     createIkan(req, res, next){
         const jenis_ikan = req.body.jenis_ikan;
+        const kategori = req.body.kategori;
+        const harga_ikan = req.body.harga_ikan;
         const foto_ikan = req.file ? req.file.path : null;
         
-        if (jenis_ikan && foto_ikan) {
+        if (jenis_ikan && kategori && harga_ikan && foto_ikan) {
             pool.getConnection(function (err, connection) {
             if (err) throw err;
             connection.query(
-                `INSERT INTO tbl_ikan (jenis_ikan, foto_ikan) VALUES (?, ?)`,
-                [jenis_ikan, foto_ikan],
+                `INSERT INTO tbl_ikan (jenis_ikan, kategori, harga_ikan, foto_ikan) VALUES (?, ?, ?, ?)`,
+                [jenis_ikan, kategori, harga_ikan, foto_ikan],
                 function (error, results) {
                 if (error) throw error;
                 res.send({ message: 'Fish added successfully', id: results.insertId });
@@ -76,14 +78,16 @@ module.exports = {
         editIkan(req, res){
         const fishId = req.params.id;
         const jenis_ikan = req.body.jenis_ikan;
+        const kategori = req.body.kategori;
+        const harga_ikan = req.body.harga_ikan;
         const foto_ikan = req.file ? req.file.path : null;
 
         if (jenis_ikan) {
             pool.getConnection(function (err, connection) {
             if (err) throw err;
             connection.query(
-                `UPDATE tbl_ikan SET jenis_ikan = ?, foto_ikan = COALESCE(?, foto_ikan) WHERE id_ikan = ?`,
-                [jenis_ikan, foto_ikan, fishId],
+                `UPDATE tbl_ikan SET jenis_ikan = ?, kategori = ?, harga_ikan = ?, foto_ikan = COALESCE(?, foto_ikan) WHERE id_ikan = ?`,
+                [jenis_ikan, kategori, harga_ikan, foto_ikan, fishId],
                 function (error, results) {
                 if (error) throw error;
                 res.send({ message: 'Fish data updated successfully' });

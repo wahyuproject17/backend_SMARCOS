@@ -11,7 +11,8 @@ module.exports = {
         pool.getConnection(function (err, connection) {
             if (err) throw err;
             connection.query(
-                `SELECT id_user, username, nama_lengkap, no_hp, email, jenkel, alamat FROM tbl_user`, function (error, result) {
+                `SELECT id_user, username, nama_lengkap, no_hp, email, jenkel, alamat, user_tanggal FROM tbl_user`, 
+                function (error, result) {
                     connection.release();
                     if (error) throw error;
                     res.send(result);
@@ -24,7 +25,8 @@ module.exports = {
         pool.getConnection(function (err, connection) {
             if (err) throw err;
             connection.query(
-                `SELECT id_user, username, nama_lengkap, no_hp, email, jenkel, alamat FROM tbl_user WHERE id_user=?`, [userid],
+                `SELECT id_user, username, nama_lengkap, no_hp, email, jenkel, alamat FROM tbl_user WHERE id_user=?`, 
+                [userid],
                 function (error, result) {
                     connection.release();
                     if (error) throw error;
@@ -75,7 +77,8 @@ module.exports = {
                 if (err) throw err;
                 connection.query(
                     `UPDATE tbl_user SET username = ?, nama_lengkap = ?, no_hp = ?, email = ?, jenkel = ?, alamat = ?, password = SHA2(?, 512) WHERE id_user = ?;`,
-                    [username, nama_lengkap, no_hp, email, jenkel, alamat, password, userid], function (error, result) {
+                    [username, nama_lengkap, no_hp, email, jenkel, alamat, password, userid], 
+                    function (error, result) {
                         connection.release();
                         if (error) {
                             console.error('Error updating data:', error);
@@ -86,7 +89,26 @@ module.exports = {
                     }
                 );
             });
-        } else {
+        }
+        if (username && nama_lengkap && no_hp && email && alamat) {
+            pool.getConnection(function (err, connection) {
+                if (err) throw err;
+                connection.query(
+                    `UPDATE tbl_user SET username = ?, nama_lengkap = ?, no_hp = ?, email = ?, jenkel = ?, alamat = ? WHERE id_user = ?;`,
+                    [username, nama_lengkap, no_hp, email, jenkel, alamat, userid], 
+                    function (error, result) {
+                        connection.release();
+                        if (error) {
+                            console.error('Error updating data:', error);
+                            res.status(500).json({ success: false, message: 'Error updating data' });
+                            return;
+                        }
+                        res.status(200).json({ success: true, message: 'Ubah data berhasil' });
+                    }
+                );
+            });
+        }
+         else {
             res.status(400).json({ success: false, message: 'Missing required fields' });
         }
     },
@@ -112,5 +134,22 @@ module.exports = {
         } else {
             res.status(400).json({ success: false, message: 'User ID is required' });
         }
+    },
+    getTotalUser(req, res) {
+        pool.getConnection(function (err, connection) {
+            if (err) throw err;
+            connection.query(
+                `SELECT COUNT(*) as total FROM tbl_user`, 
+                function (error, result) {
+                    connection.release();
+                    if (error) {
+                        console.error('Error fetching total users:', error);
+                        res.status(500).json({ success: false, message: 'Error fetching total users' });
+                        return;
+                    }
+                    res.status(200).json({ success: true, total_users: result[0].total });
+                }
+            );
+        });
     }
 };
