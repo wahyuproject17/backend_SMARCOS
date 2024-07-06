@@ -41,7 +41,7 @@ module.exports = {
                                 level: 1, // Level 1 untuk admin
                                 userid: adminResults[0].id_admin,
                                 username: username // Sertakan username dalam token
-                            });
+                            }, process.env.ADMIN_JWT_SECRET);
 
                             // Send the JWT token in the Authorization header
                             res.header('Authorization', `Bearer ${token}`);
@@ -74,7 +74,7 @@ module.exports = {
                                         level: 2, // Level 2 untuk user
                                         userid: userResults[0].id_user,
                                         username: username // Sertakan username dalam token
-                                    });
+                                    }, process.env.USER_JWT_SECRET);
 
                                     // Send the JWT token in the Authorization header
                                     res.header('Authorization', `Bearer ${token}`);
@@ -119,7 +119,10 @@ module.exports = {
 
         if (!token) return res.sendStatus(401);
 
-        jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+        // Determine the correct secret key based on the level of the user
+        const secretKey = req.user && req.user.level === 1 ? process.env.ADMIN_JWT_SECRET : process.env.USER_JWT_SECRET;
+
+        jwt.verify(token, secretKey, (err, user) => {
             if (err) return res.sendStatus(403);
             req.user = user;
             next();

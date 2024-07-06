@@ -110,6 +110,98 @@ module.exports = {
             connection.release();
         });
     },
+    // Fungsi untuk mendapatkan stok ikan berdasarkan jenis ikan untuk setiap kategori (benih dan konsumsi)
+    getStockByJenisIkan(req, res) {
+        pool.getConnection(function(err, connection) {
+            if (err) {
+                console.error('Database connection error:', err);
+                res.status(500).json({ success: false, message: 'Database connection failed' });
+                return;
+            }
+
+            // Query untuk mendapatkan semua jenis ikan dari tbl_ikan
+            let queryJenisIkan = `SELECT id_ikan, jenis_ikan FROM tbl_ikan`;
+
+            connection.query(queryJenisIkan, function(errorJenisIkan, resultJenisIkan) {
+                if (errorJenisIkan) {
+                    connection.release();
+                    console.error('Query error (tbl_ikan):', errorJenisIkan);
+                    res.status(500).json({ success: false, message: 'Query failed for tbl_ikan' });
+                    return;
+                }
+
+                // Array untuk menyimpan semua promises
+                let promises = [];
+
+                // Loop melalui setiap jenis ikan
+                resultJenisIkan.forEach(jenisIkan => {
+                    let id_ikan = jenisIkan.id_ikan;
+                    let jenis = jenisIkan.jenis_ikan;
+
+                    // Query untuk mendapatkan total ikan dari tbl_benih berdasarkan jenis ikan
+                    let queryBenih = `
+                        SELECT IFNULL(SUM(jumlah_ikan), 0) as total_benih
+                        FROM tbl_benih 
+                        WHERE id_ikan = ?`;
+
+                    // Query untuk mendapatkan total ikan dari tbl_konsumsi berdasarkan jenis ikan
+                    let queryKonsumsi = `
+                        SELECT IFNULL(SUM(jumlah_ikan), 0) as total_konsumsi
+                        FROM tbl_konsumsi 
+                        WHERE id_ikan = ?`;
+
+                    // Buat promise untuk query jumlah ikan di tbl_benih
+                    let promiseBenih = new Promise((resolve, reject) => {
+                        connection.query(queryBenih, [id_ikan], function(errorBenih, resultBenih) {
+                            if (errorBenih) {
+                                reject(errorBenih);
+                            } else {
+                                resolve({
+                                    jenis_ikan: jenis,
+                                    kategori: 'benih',
+                                    total: resultBenih[0].total_benih
+                                });
+                            }
+                        });
+                    });
+
+                    // Buat promise untuk query jumlah ikan di tbl_konsumsi
+                    let promiseKonsumsi = new Promise((resolve, reject) => {
+                        connection.query(queryKonsumsi, [id_ikan], function(errorKonsumsi, resultKonsumsi) {
+                            if (errorKonsumsi) {
+                                reject(errorKonsumsi);
+                            } else {
+                                resolve({
+                                    jenis_ikan: jenis,
+                                    kategori: 'konsumsi',
+                                    total: resultKonsumsi[0].total_konsumsi
+                                });
+                            }
+                        });
+                    });
+
+                    // Tambahkan promise ke array promises
+                    promises.push(promiseBenih);
+                    promises.push(promiseKonsumsi);
+                });
+
+                // Eksekusi semua promises dan kirim hasilnya sebagai response
+                Promise.all(promises)
+                    .then(results => {
+                        connection.release();
+                        res.json({
+                            success: true,
+                            data: results
+                        });
+                    })
+                    .catch(error => {
+                        connection.release();
+                        console.error('Query execution error:', error);
+                        res.status(500).json({ success: false, message: 'Query execution failed' });
+                    });
+            });
+        });
+    },
     createBenih(req, res){            
             let id_ikan = req.body.id_ikan;
             let ukuran = req.body.ukuran_ikan;
@@ -120,8 +212,7 @@ module.exports = {
                 pool.getConnection(function(err, connection){
                     if (err) throw err;
                     connection.query(
-                        `INSERT INTO tbl_benih (id_ikan, ukuran, jumlah_
-                        ikan, harga_ikan) VALUES (?,?,?,?);`,
+                        `INSERT INTO tbl_benih (id_ikan, ukuran, jumlah_ikan, harga_ikan) VALUES (?,?,?,?);`,
                         [id_ikan, ukuran, jumlah_ikan, harga_ikan], function (error, result){
                             if (error) throw error;
                             res.send({ message: 'Fish data updated successfully' });
@@ -459,4 +550,5 @@ module.exports = {
             });
         });
     }
+    
     };
