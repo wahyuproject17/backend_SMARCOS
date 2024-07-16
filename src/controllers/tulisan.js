@@ -57,7 +57,7 @@ module.exports ={
         pool.getConnection(function(err, connection){
             if (err) throw error;
             connection.query(
-                `SELECT * FROM tbl_tulisan`,
+                `SELECT ucapan, alamat, telepon, email, instagram, alamat FROM tbl_tulisan`,
                 function(error, results){
                     if (error) throw error;
                     res.send(results);
