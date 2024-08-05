@@ -2,7 +2,6 @@
 const express = require('express');
 const app = express();
 const session = require('express-session');
-const path = require('path');
 const cors = require('cors');
 const flash = require('req-flash');
 const port = 5000;
@@ -41,21 +40,9 @@ const sessionStore = new MySQLStore(database);
 // body parser
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(cors());
-
-// library session
-app.use(session({
-  resave: false,
-  saveUninitialized: false,
-  secret: 'w@hyou',
-  name: 'secretName',
-  store: sessionStore,
-  cookie: {
-    sameSite: true,
-    maxAge: 1000 * 60 * 60 * 1 // Sesi berlaku selama 1 jam
-  }
+app.use(cors({
+  origin: '*', // Hanya mengizinkan permintaan dari https://bbimijen.my.id
 }));
-app.use(flash());
 
 // Untuk melayani file gambar
 app.use('/uploads', express.static('uploads'));
