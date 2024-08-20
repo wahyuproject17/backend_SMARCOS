@@ -36,7 +36,7 @@ module.exports = {
             });
         }
     },
-    // Middleware untuk memeriksa dan menyimpan ID pengguna dari token
+
     checkAuth(req, res, next) {
         const authHeader = req.headers['authorization'];
         const token = authHeader && authHeader.split(' ')[1];
@@ -53,6 +53,30 @@ module.exports = {
             // Simpan ID pengguna dari token ke request object
             req.userId = decodedToken.userid; // Sesuaikan dengan payload token Anda
             next(); // Lanjut ke middleware berikutnya atau handler route
+        });
+    },
+
+    // Middleware baru untuk memeriksa apakah pengguna adalah admin
+    isAdmin(req, res, next) {
+        const authHeader = req.headers['authorization'];
+        const token = authHeader && authHeader.split(' ')[1];
+
+        if (!token) {
+            return res.status(401).json({ success: false, message: 'Token not provided' });
+        }
+
+        jwt.verify(token, JWT_SECRET, (err, decodedToken) => {
+            if (err) {
+                return res.status(403).json({ success: false, message: 'Token is not valid' });
+            }
+            
+            // Cek apakah role di token adalah admin
+            if (decodedToken.role === 'admin') {
+                req.userId = decodedToken.userid; // Simpan userId jika diperlukan
+                next(); // Jika admin, lanjut ke middleware berikutnya
+            } else {
+                return res.status(403).json({ success: false, message: 'Access denied. Not an admin.' });
+            }
         });
     }
 };
