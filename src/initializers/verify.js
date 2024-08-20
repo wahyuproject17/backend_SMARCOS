@@ -1,6 +1,7 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 const JWT_SECRET = process.env.ADMIN_JWT_SECRET;
+const USER_JWT_SECRET = process.env.USER_JWT_SECRET;
 
 module.exports = {
     isLogin(req, res, next) {
@@ -45,7 +46,7 @@ module.exports = {
             return res.status(401).json({ success: false, message: 'Token not provided' });
         }
 
-        jwt.verify(token, JWT_SECRET, (err, decodedToken) => {
+        jwt.verify(token, USER_JWT_SECRET, (err, decodedToken) => {
             if (err) {
                 console.error('Token verification failed:', err);
                 return res.status(403).json({ success: false, message: 'Token is not valid' });
