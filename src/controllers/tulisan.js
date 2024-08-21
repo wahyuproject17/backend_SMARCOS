@@ -1,38 +1,37 @@
-const database = require('../initializers/database');
-
-let mysql      = require('mysql');
-let pool       = mysql.createPool(database);
-
-pool.on('error',(err)=> {
-    console.error(err);
+const pool = require('../initializers/database');
+pool.on('error', (err) => {
+    console.error('Database connection error:', err);
 });
 
-module.exports ={
-    addTulisan(req, res){
+module.exports = {
+    async addTulisan(req, res) {
         let ucapan = req.body.ucapan;
         let alamat = req.body.alamat;
         let telepon = req.body.telepon;
         let instagram = req.body.instagram;
         let email = req.body.email;
 
-        if(ucapan && alamat && telepon && instagram && email){
-            pool.getConnection(function(err, connection){
-                if (err) throw error;
-                connection.query(
-                    `INSERT INTO tbl_tulisan(ucapan, alamat, telepon, instagram, email) VALUES (?,?,?,?,?); `,
-                    [ucapan, alamat, telepon, instagram, email], function (error, results){
-                        if (error) throw error;
-                        req.flash('color', 'success');
-                        req.flash('status', 'Yes..');
-                        req.flash('message', 'Penambahan berhasil');
-                    
-                        res.redirect('/');
-                    }
-                )
-            })
+        if (ucapan && alamat && telepon && instagram && email) {
+            try {
+                await pool.query(
+                    `INSERT INTO tbl_tulisan(ucapan, alamat, telepon, instagram, email) VALUES (?,?,?,?,?);`,
+                    [ucapan, alamat, telepon, instagram, email]
+                );
+
+                req.flash('color', 'success');
+                req.flash('status', 'Yes..');
+                req.flash('message', 'Penambahan berhasil');
+                res.redirect('/');
+            } catch (error) {
+                console.error('Insert error:', error);
+                res.status(500).json({ success: false, message: 'Penambahan gagal' });
+            }
+        } else {
+            res.status(400).json({ success: false, message: 'Data tidak lengkap' });
         }
     },
-    editTulisan(req, res){
+
+    async editTulisan(req, res) {
         let id = req.params.id;
         let ucapan = req.body.ucapan;
         let alamat = req.body.alamat;
@@ -41,28 +40,30 @@ module.exports ={
         let email = req.body.email;
 
         if (ucapan && alamat && telepon && instagram && email && id) {
-            pool.getConnection(function(err, connection) {
-                if (err) throw err;
-                connection.query(
+            try {
+                await pool.query(
                     `UPDATE tbl_tulisan SET ucapan=?, alamat=?, telepon=?, instagram=?, email=? WHERE id_tulisan=?;`,
-                    [ucapan, alamat, telepon, instagram, email, id],
-                    function(error, results) {
-                        if (error) throw error;
-                    }
-                )
-            })
+                    [ucapan, alamat, telepon, instagram, email, id]
+                );
+                res.status(200).json({ success: true, message: 'Pengeditan berhasil' });
+            } catch (error) {
+                console.error('Update error:', error);
+                res.status(500).json({ success: false, message: 'Pengeditan gagal' });
+            }
+        } else {
+            res.status(400).json({ success: false, message: 'Data tidak lengkap' });
         }
     },
-    showTulisan(req, res){
-        pool.getConnection(function(err, connection){
-            if (err) throw error;
-            connection.query(
-                `SELECT ucapan, alamat, telepon, email, instagram, alamat FROM tbl_tulisan`,
-                function(error, results){
-                    if (error) throw error;
-                    res.send(results);
-                }
-            )
-        })
+
+    async showTulisan(req, res) {
+        try {
+            const [results] = await pool.query(
+                `SELECT ucapan, alamat, telepon, email, instagram FROM tbl_tulisan`
+            );
+            res.send(results);
+        } catch (error) {
+            console.error('Query error:', error);
+            res.status(500).json({ success: false, message: 'Gagal menampilkan data' });
+        }
     }
-}
+};

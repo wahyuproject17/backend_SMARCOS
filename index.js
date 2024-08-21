@@ -1,14 +1,11 @@
-// library
 const express = require('express');
 const app = express();
 const session = require('express-session');
 const cors = require('cors');
-const flash = require('req-flash');
 const port = 5000;
 const bodyParser = require('body-parser');
 const MySQLStore = require('express-mysql-session')(session);
-const mysql = require('mysql');
-const database = require('./src/initializers/database');
+const database = require('./src/initializers/database'); // Ini harus mengembalikan objek konfigurasi, bukan pool
 
 require('dotenv').config();
 
@@ -24,24 +21,29 @@ const galeryRoutes = require('./src/routes/router-galery');
 // view engine
 app.set('view engine', 'ejs');
 
-// Tes koneksi ke database
-const connection = mysql.createConnection(database);
-connection.connect(function(err) {
-  if (err) {
-    console.error('Error connecting to MySQL: ', err.stack);
-    return;
-  }
-  console.log('Connected to MySQL as id ' + connection.threadId);
+// Buat penyimpanan sesi MySQL dengan menggunakan konfigurasi pool
+const sessionStore = new MySQLStore({
+  // Pastikan menggunakan konfigurasi yang sama dengan pool
+  host: process.env.db_host,
+  user: process.env.db_user,
+  password: process.env.db_pass,
+  database: process.env.db_database,
+  createDatabaseTable: true // opsional, jika ingin membuat tabel sesi otomatis
 });
-
-// Buat penyimpanan sesi MySQL
-const sessionStore = new MySQLStore(database);
 
 // body parser
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(cors({
-  origin: '*', // Hanya mengizinkan permintaan dari https://bbimijen.my.id
+  origin: '*',
+}));
+
+// Setup middleware session
+app.use(session({
+    secret: 'process.env.ADMIN_JWT_SECRET',
+    resave: false,
+    saveUninitialized: true,
+    store: sessionStore
 }));
 
 // Untuk melayani file gambar

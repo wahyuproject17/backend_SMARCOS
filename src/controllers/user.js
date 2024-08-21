@@ -1,155 +1,111 @@
-const database = require('../initializers/database');
-let mysql = require('mysql');
-let pool = mysql.createPool(database);
-
+const pool = require('../initializers/database');
 pool.on('error', (err) => {
-    console.error(err);
+    console.error('Database connection error:', err);
 });
 
 module.exports = {
-    getUser(req, res) {
-        pool.getConnection(function (err, connection) {
-            if (err) throw err;
-            connection.query(
-                `SELECT id_user, username, nama_lengkap, no_hp, email, jenkel, alamat, user_tanggal FROM tbl_user`, 
-                function (error, result) {
-                    connection.release();
-                    if (error) throw error;
-                    res.send(result);
-                }
+    async getUser(req, res) {
+        try {
+            const [results] = await pool.query(
+                `SELECT id_user, username, nama_lengkap, no_hp, email, jenkel, alamat, user_tanggal FROM tbl_user`
             );
-        });
+            res.send(results);
+        } catch (error) {
+            console.error('Error fetching users:', error);
+            res.status(500).json({ success: false, message: 'Error fetching users' });
+        }
     },
-    getUserById(req, res) {
+
+    async getUserById(req, res) {
         const userid = req.params.id;
-        pool.getConnection(function (err, connection) {
-            if (err) throw err;
-            connection.query(
+        try {
+            const [results] = await pool.query(
                 `SELECT id_user, username, nama_lengkap, no_hp, email, jenkel, alamat FROM tbl_user WHERE id_user=?`, 
-                [userid],
-                function (error, result) {
-                    connection.release();
-                    if (error) throw error;
-                    res.send(result);
-                }
+                [userid]
             );
-        });
+            res.send(results);
+        } catch (error) {
+            console.error('Error fetching user by ID:', error);
+            res.status(500).json({ success: false, message: 'Error fetching user by ID' });
+        }
     },
-    createUser(req, res) {
+
+    async createUser(req, res) {
         let { username, nama_lengkap, no_hp, email, jenkel, alamat, password } = req.body;
 
         if (username && nama_lengkap && no_hp && email && alamat && password) {
-            pool.getConnection(function (err, connection) {
-                if (err) {
-                    console.error('Database connection error:', err);
-                    res.status(500).json({ success: false, message: 'Database connection failed' });
-                    return;
-                }
-
-                connection.query(
+            try {
+                await pool.query(
                     `INSERT INTO tbl_user (username, nama_lengkap, no_hp, email, jenkel, alamat, password) VALUES (?,?,?,?,?,?,SHA2(?,512));`,
-                    [username, nama_lengkap, no_hp, email, jenkel, alamat, password],
-                    function (error, results) {
-                        connection.release();
-
-                        if (error) {
-                            console.error('Error inserting data:', error);
-                            res.status(500).json({ success: false, message: 'Error inserting data' });
-                            return;
-                        }
-
-                        console.log('User registered successfully');
-                        res.status(200).json({ success: true, message: 'Registrasi berhasil' });
-                    }
+                    [username, nama_lengkap, no_hp, email, jenkel, alamat, password]
                 );
-            });
+                res.status(200).json({ success: true, message: 'Registrasi berhasil' });
+            } catch (error) {
+                console.error('Error inserting user:', error);
+                res.status(500).json({ success: false, message: 'Error inserting user' });
+            }
         } else {
-            console.log('Missing required fields');
             res.status(400).json({ success: false, message: 'Missing required fields' });
         }
     },
-    updateUser(req, res) {
+
+    async updateUser(req, res) {
         let userid = req.params.id;
         let { username, nama_lengkap, no_hp, email, jenkel, alamat, password } = req.body;
 
-        if (username && nama_lengkap && no_hp && email && alamat && password) {
-            pool.getConnection(function (err, connection) {
-                if (err) throw err;
-                connection.query(
-                    `UPDATE tbl_user SET username = ?, nama_lengkap = ?, no_hp = ?, email = ?, jenkel = ?, alamat = ?, password = SHA2(?, 512) WHERE id_user = ?;`,
-                    [username, nama_lengkap, no_hp, email, jenkel, alamat, password, userid], 
-                    function (error, result) {
-                        connection.release();
-                        if (error) {
-                            console.error('Error updating data:', error);
-                            res.status(500).json({ success: false, message: 'Error updating data' });
-                            return;
-                        }
-                        res.status(200).json({ success: true, message: 'Ubah data berhasil' });
-                    }
-                );
-            });
-        }
         if (username && nama_lengkap && no_hp && email && alamat) {
-            pool.getConnection(function (err, connection) {
-                if (err) throw err;
-                connection.query(
-                    `UPDATE tbl_user SET username = ?, nama_lengkap = ?, no_hp = ?, email = ?, jenkel = ?, alamat = ? WHERE id_user = ?;`,
-                    [username, nama_lengkap, no_hp, email, jenkel, alamat, userid], 
-                    function (error, result) {
-                        connection.release();
-                        if (error) {
-                            console.error('Error updating data:', error);
-                            res.status(500).json({ success: false, message: 'Error updating data' });
-                            return;
-                        }
-                        res.status(200).json({ success: true, message: 'Ubah data berhasil' });
-                    }
-                );
-            });
-        }
-         else {
+            try {
+                if (password) {
+                    // Update with password
+                    await pool.query(
+                        `UPDATE tbl_user SET username = ?, nama_lengkap = ?, no_hp = ?, email = ?, jenkel = ?, alamat = ?, password = SHA2(?, 512) WHERE id_user = ?;`,
+                        [username, nama_lengkap, no_hp, email, jenkel, alamat, password, userid]
+                    );
+                } else {
+                    // Update without password
+                    await pool.query(
+                        `UPDATE tbl_user SET username = ?, nama_lengkap = ?, no_hp = ?, email = ?, jenkel = ?, alamat = ? WHERE id_user = ?;`,
+                        [username, nama_lengkap, no_hp, email, jenkel, alamat, userid]
+                    );
+                }
+
+                res.status(200).json({ success: true, message: 'Ubah data berhasil' });
+            } catch (error) {
+                console.error('Error updating user:', error);
+                res.status(500).json({ success: false, message: 'Error updating user' });
+            }
+        } else {
             res.status(400).json({ success: false, message: 'Missing required fields' });
         }
     },
-    deleteUser(req, res) {
+
+    async deleteUser(req, res) {
         let userid = req.params.id;
 
         if (userid) {
-            pool.getConnection(function (err, connection) {
-                if (err) throw err;
-                connection.query(
-                    `DELETE FROM tbl_user WHERE id_user = ?`, [userid],
-                    function (error, result) {
-                        connection.release();
-                        if (error) {
-                            console.error('Error deleting data:', error);
-                            res.status(500).json({ success: false, message: 'Error deleting data' });
-                            return;
-                        }
-                        res.status(200).json({ success: true, message: 'Penghapusan berhasil' });
-                    }
+            try {
+                await pool.query(
+                    `DELETE FROM tbl_user WHERE id_user = ?`, [userid]
                 );
-            });
+                res.status(200).json({ success: true, message: 'Penghapusan berhasil' });
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                res.status(500).json({ success: false, message: 'Error deleting user' });
+            }
         } else {
             res.status(400).json({ success: false, message: 'User ID is required' });
         }
     },
-    getTotalUser(req, res) {
-        pool.getConnection(function (err, connection) {
-            if (err) throw err;
-            connection.query(
-                `SELECT COUNT(*) as total FROM tbl_user`, 
-                function (error, result) {
-                    connection.release();
-                    if (error) {
-                        console.error('Error fetching total users:', error);
-                        res.status(500).json({ success: false, message: 'Error fetching total users' });
-                        return;
-                    }
-                    res.status(200).json({ success: true, total_users: result[0].total });
-                }
+
+    async getTotalUser(req, res) {
+        try {
+            const [results] = await pool.query(
+                `SELECT COUNT(*) as total FROM tbl_user`
             );
-        });
+            res.status(200).json({ success: true, total_users: results[0].total });
+        } catch (error) {
+            console.error('Error fetching total users:', error);
+            res.status(500).json({ success: false, message: 'Error fetching total users' });
+        }
     }
 };
