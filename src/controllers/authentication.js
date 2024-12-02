@@ -65,7 +65,8 @@ module.exports = {
                                 level: 2,
                                 token: token,
                                 message: 'Login berhasil sebagai user',
-                                username: username
+                                username: username,
+                                id: userResults[0].id_user
                             });
                         } else {
                             return res.json({ success: false, message: 'Email atau password anda salah!' });

@@ -10,6 +10,8 @@ router.put('/edit-ikan/:id', verifyUser.isLogin, dashboardController.uploadImage
 router.delete('/delete-ikan/:id', verifyUser.isLogin, dashboardController.deleteIkan);
 router.get('/get-total-ikan', dashboardController.getTotalIkan);
 router.get('/get-stock', dashboardController.getStockByJenisIkan);
+router.post('/get-chatbot', dashboardController.getStockForChatbot);
+router.get('/get-jenisikan', dashboardController.getTotalJenisIkan);
 
 router.get('/get-benih', dashboardController.getBenih);
 router.post('/add-benih', verifyUser.isLogin, dashboardController.createBenih);

@@ -13,7 +13,6 @@ require('dotenv').config();
 const userRoutes = require('./src/routes/router-user');
 const adminRoutes = require('./src/routes/router-admin');
 const authRoutes = require('./src/routes/router-authentication');
-const appRoutes = require('./src/routes/router-app');
 const dashboardRoutes = require('./src/routes/router-dashboard');
 const orderRoutes = require('./src/routes/router-order');
 const galeryRoutes = require('./src/routes/router-galery');
@@ -47,16 +46,15 @@ app.use(session({
 }));
 
 // Untuk melayani file gambar
-app.use('/uploads', express.static('uploads'));
+app.use('api/uploads', express.static('uploads'));
 
 // routes
-app.use('/auth', authRoutes);
-app.use('/user', userRoutes);
-app.use('/dashboard', dashboardRoutes);
-app.use('/admin', adminRoutes);
-app.use('/order', orderRoutes);
-app.use('/gallery', galeryRoutes);
-app.use('/', appRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/order', orderRoutes);
+app.use('/api/gallery', galeryRoutes);
 
 app.listen(port, () => {
   console.log(`Server berjalan di port: ${port}`);

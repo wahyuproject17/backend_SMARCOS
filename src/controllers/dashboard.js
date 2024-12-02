@@ -314,5 +314,78 @@ module.exports = {
             console.error('Query error:', error);
             res.status(500).json({ success: false, message: 'Database query failed' });
         }
-    }
+    },
+    async getTotalJenisIkan(req, res) {
+        try {
+            // Mengambil jumlah jenis ikan yang unik
+            const [result] = await pool.query(`SELECT COUNT(DISTINCT jenis_ikan) as total_jenis FROM tbl_ikan`);
+            
+            // Parsing hasil query
+            const totalJenisIkan = parseInt(result[0].total_jenis);
+    
+            // Mengirimkan respons JSON
+            res.json({
+                success: true,
+                total_jenis_ikan: totalJenisIkan
+            });
+        } catch (error) {
+            // Menangani error query
+            console.error('Query error:', error);
+            res.status(500).json({ success: false, message: 'Database query failed' });
+        }
+    },    
+    async getStockForChatbot(req, res) {
+        try {
+            // Ambil parameter dari body
+            const { jenis_ikan, ukuran } = req.body;
+            console.log(jenis_ikan, ukuran);
+    
+            // Kondisi untuk filter query jika parameter diberikan
+            const filters = [];
+            const values = [];
+    
+            if (jenis_ikan) {
+                filters.push('tbl_ikan.jenis_ikan = ?');
+                values.push(jenis_ikan);
+            }
+    
+            if (ukuran) {
+                filters.push('tbl_benih.ukuran = ?');
+                values.push(ukuran);
+            }
+    
+            // Gabungkan kondisi filter dengan 'AND' jika ada
+            const filterQuery = filters.length > 0 ? `WHERE ${filters.join(' AND ')}` : '';
+    
+            // Query untuk mendapatkan data yang difilter
+            const query = `
+                SELECT 
+                    tbl_ikan.jenis_ikan, 
+                    tbl_benih.ukuran, 
+                    IFNULL(SUM(tbl_benih.jumlah_ikan), 0) AS stock,
+                    IFNULL(AVG(tbl_benih.harga_ikan), 0) AS price
+                FROM tbl_ikan
+                LEFT JOIN tbl_benih ON tbl_ikan.id_ikan = tbl_benih.id_ikan
+                ${filterQuery}
+                GROUP BY tbl_ikan.jenis_ikan, tbl_benih.ukuran
+            `;
+    
+            // Eksekusi query
+            const [results] = await pool.query(query, values);
+    
+            // Format data hasil query
+            const formattedResults = results.map((row) => ({
+                jenis_ikan: row.jenis_ikan,
+                ukuran: row.ukuran || "tidak spesifik",
+                stock: row.stock,
+                price: row.price ? parseInt(row.price) : 0
+            }));
+    
+            res.json({ success: true, data: formattedResults });
+            console.log(formattedResults);
+        } catch (error) {
+            console.error('Query execution error:', error);
+            res.status(500).json({ success: false, message: 'Query execution failed' });
+        }
+    }    
 };
